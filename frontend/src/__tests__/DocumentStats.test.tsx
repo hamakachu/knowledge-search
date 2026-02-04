@@ -86,4 +86,25 @@ describe('DocumentStats', () => {
       expect(global.fetch).toHaveBeenCalledWith('/api/stats');
     });
   });
+
+  it('testMethod_lastUpdatedがnullの場合にデータなしメッセージを表示する', async () => {
+    const mockStats = {
+      totalDocuments: 0,
+      lastUpdated: null
+    };
+
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockStats
+    });
+
+    render(<DocumentStats />);
+
+    await waitFor(() => {
+      expect(screen.getByText('総ドキュメント数')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(screen.getByText('データがありません')).toBeInTheDocument();
+  });
 });

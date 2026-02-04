@@ -1,4 +1,4 @@
 export interface Stats {
   totalDocuments: number;
-  lastUpdated: string;
+  lastUpdated: string | null;
 }

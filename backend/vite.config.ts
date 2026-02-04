@@ -21,6 +21,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    env: {
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/groovy_knowledge_search',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

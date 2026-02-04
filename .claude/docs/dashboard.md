@@ -85,53 +85,17 @@
 
 ## 履歴
 
-### [2026-02-04 00:00] - バックエンド統計API実装
+### [2026-02-04] - データベース統合実装承認・完了
 - **発信**: メインエージェント
-- **内容**: `GET /api/stats` エンドポイントの実装依頼
-- **受信**: backend_developer
-- **結果**: ✅ 実装完了（全品質チェックパス）
-- **成果物**:
-  - `backend/src/services/statsService.ts`
-  - `backend/src/routes/stats.ts`
-  - `backend/src/__tests__/stats.test.ts`
-  - `backend/src/app.ts` (変更)
-
-### [2026-02-04 00:10] - フロントエンド統計表示実装
-- **発信**: メインエージェント
-- **内容**: DocumentStatsコンポーネントの実装依頼（バックエンドAPI連携）
-- **受信**: frontend_developer
-- **結果**: ✅ 実装完了（全品質チェックパス、11/11 tests passed）
-- **成果物**:
-  - `frontend/src/types/stats.ts`
-  - `frontend/src/hooks/useStats.ts`
-  - `frontend/src/components/DocumentStats.tsx`
-  - `frontend/src/App.tsx` (変更)
-  - `frontend/src/__tests__/useStats.test.ts`
-  - `frontend/src/__tests__/DocumentStats.test.tsx`
-  - `frontend/src/__tests__/App.test.tsx` (変更)
-
-### [2026-02-04 00:20] - TypeScriptコードレビュー
-- **発信**: メインエージェント
-- **内容**: バックエンド・フロントエンド統計機能のコードレビュー依頼
-- **受信**: typescript_reviewer
-- **結果**: ✅ レビュー完了（すべてのチェック項目クリア）
-- **評価**:
-  - テスト: ✅ バックエンド 4/4、フロントエンド 11/11 パス
-  - Lint/型チェック: ✅ エラーなし
-  - ビルド: ✅ 成功
-  - TypeScript特有のチェック: ✅ 型の品質・型安全性・tsconfig設定すべて良好
-  - コード品質: 保守性（優秀）、安全性（良好）、パフォーマンス（良好）
-- **推奨事項**: テストカバレッジツール導入、API仕様文書化、エラーログ改善（すべてオプション）
-
-### [2026-02-04 00:30] - ユーザー承認・変更反映完了
-- **発信**: メインエージェント
-- **内容**: ドキュメント統計機能の実装をユーザーに報告
+- **内容**: データベース統合実装をユーザーに報告
 - **結果**: ✅ ユーザー承認取得、変更反映完了
 - **成果**:
-  - バックエンド: `GET /api/stats` エンドポイント実装完了
-  - フロントエンド: `DocumentStats` コンポーネント実装完了
-  - エージェント連携フロー確立（backend_developer → frontend_developer → typescript_reviewer）
-  - dashboard.mdを通じた構造化されたコミュニケーション成功
+  - PostgreSQLデータベースからの実データ取得実装完了
+  - フロントエンド型定義更新完了（`lastUpdated: string | null`）
+  - データベースが空の場合の適切なハンドリング実装
+  - バックエンド・フロントエンド間の型定義の整合性確保
+  - TDDサイクル（Red → Green → Refactor）の実践成功
+  - エージェント連携フロー（backend_developer → frontend_developer → typescript_reviewer）の確立
 
 ---
 
@@ -141,7 +105,7 @@
 1. サブエージェントにタスクを依頼する前に、「現在のタスク」セクションに指示を記載
    - 担当サブエージェントを明記（frontend_developer / backend_developer / typescript_reviewer等）
 2. サブエージェント起動後、「サブエージェント → メインエージェント」セクションを確認
-3. 結果を受け取ったら、履歴に記録してセクションをクリア
+3. 結果を受け取ったら、履歴に記録（最新の1件のみ保持）してセクションをクリア
 
 ### 開発サブエージェント（frontend_developer / backend_developer）
 1. 起動時に「メインエージェント → サブエージェント」セクションを確認
@@ -155,4 +119,4 @@
 ### レビューサブエージェント（typescript_reviewer）
 1. 起動時に「メインエージェント → サブエージェント」セクションを確認
 2. レビュー実行後、「サブエージェント → メインエージェント」セクションに結果を記載
-3. メインエージェントへの返答完了後、履歴に記録
+3. メインエージェントへの返答完了後、履歴に記録（最新の1件のみ保持）
