@@ -228,6 +228,23 @@
 
 **重要**: スキル化は必要性が明確になってから実施する。過度な抽象化は避ける。
 
+### 9.5 利用可能なスキル
+
+現在、以下のスキルが利用可能です:
+
+#### skill-creator
+- **目的**: 繰り返しパターンからスキル定義を自動生成
+- **使用方法**:
+  1. dashboard.mdの「メインエージェント → サブエージェント」セクションにタスク指示を記載
+  2. Task toolで skill_creator エージェントを起動
+  3. dashboard.mdで結果を確認
+- **詳細**: [skills/skill_creator/SKILL.md](skills/skill_creator/SKILL.md)
+
+**スキル追加の手順**:
+1. 繰り返しパターンを3回以上確認
+2. skill-creatorを使用してスキル定義を生成
+3. CLAUDE.mdのこのセクションにスキル情報を追加
+
 ---
 
 ## 10. 次に行うべきアクション
@@ -315,5 +332,6 @@
 | **frontend_developer** | フロントエンド実装 | React + TypeScript + Tailwind CSS |
 | **backend_developer** | バックエンド実装 | Express + TypeScript + PostgreSQL |
 | **typescript_reviewer** | コードレビュー | TypeScript品質チェック |
+| **skill_creator** | スキル定義の生成・管理 | スキル化フレームワーク |
 
 **すべての開発工程でこのルールを遵守すること。**
