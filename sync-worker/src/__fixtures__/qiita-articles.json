@@ -1,0 +1,38 @@
+[
+  {
+    "id": "a1b2c3d4e5f6g7h8i9j0",
+    "title": "TypeScriptで型安全なAPI設計を学ぶ",
+    "url": "https://example.qiita.com/items/a1b2c3d4e5f6g7h8i9j0",
+    "created_at": "2024-01-15T10:30:00+09:00",
+    "updated_at": "2024-01-20T15:45:00+09:00",
+    "user": {
+      "id": "user001",
+      "name": "山田太郎"
+    },
+    "body": "# TypeScriptで型安全なAPI設計\n\nTypeScriptを使った型安全なAPI設計について解説します。\n\n## 型定義の重要性\n\nAPIのリクエスト・レスポンスに型を付けることで、コンパイル時にエラーを検出できます。\n\n```typescript\ninterface ApiResponse {\n  status: string;\n  data: any;\n}\n```\n\n## まとめ\n\n型安全なAPI設計により、バグを未然に防ぐことができます。"
+  },
+  {
+    "id": "b2c3d4e5f6g7h8i9j0k1",
+    "title": "React Hooksの実践的な使い方",
+    "url": "https://example.qiita.com/items/b2c3d4e5f6g7h8i9j0k1",
+    "created_at": "2024-01-18T14:20:00+09:00",
+    "updated_at": "2024-01-25T09:15:00+09:00",
+    "user": {
+      "id": "user002",
+      "name": "佐藤花子"
+    },
+    "body": "# React Hooksの実践\n\nuseStateやuseEffectなど、React Hooksの実践的な使い方を紹介します。\n\n## useState\n\n状態管理の基本となるフックです。\n\n```typescript\nconst [count, setCount] = useState(0);\n```\n\n## useEffect\n\n副作用を扱うためのフックです。\n\n```typescript\nuseEffect(() => {\n  console.log('Mounted');\n}, []);\n```\n\n## まとめ\n\nHooksを使うことで、関数コンポーネントでも状態管理が可能になります。"
+  },
+  {
+    "id": "c3d4e5f6g7h8i9j0k1l2",
+    "title": "PostgreSQL全文検索のベストプラクティス",
+    "url": "https://example.qiita.com/items/c3d4e5f6g7h8i9j0k1l2",
+    "created_at": "2024-02-01T16:45:00+09:00",
+    "updated_at": "2024-02-01T16:45:00+09:00",
+    "user": {
+      "id": "user003",
+      "name": "鈴木一郎"
+    },
+    "body": "# PostgreSQL全文検索のベストプラクティス\n\nPostgreSQLのpg_trgm拡張を使った日本語全文検索について解説します。\n\n## pg_trgm拡張\n\nトライグラムインデックスを使用した高速な類似検索が可能です。\n\n```sql\nCREATE EXTENSION IF NOT EXISTS pg_trgm;\nCREATE INDEX idx_title ON documents USING gin (title gin_trgm_ops);\n```\n\n## 検索クエリ\n\n類似度検索を実行できます。\n\n```sql\nSELECT * FROM documents WHERE title % 'キーワード';\n```\n\n## パフォーマンス\n\nGINインデックスにより、大量のデータでも高速に検索できます。"
+  }
+]
