@@ -10,33 +10,18 @@
 
 ### メインエージェント → サブエージェント
 
-**タスクステータス**: スキル作成依頼（動作テスト）
+**タスクステータス**: なし
 
-**担当サブエージェント**: skill_creator
+**担当サブエージェント**: （次のタスク時に記載）
 
 **タスク内容**:
-以下の繰り返しパターンをスキル化したい
-
-**繰り返し回数**: 5回以上
-
-**具体例**:
-1. バックエンド実装完了後 → `pnpm typecheck && pnpm lint && pnpm test` を実行
-2. フロントエンド実装完了後 → `pnpm typecheck && pnpm lint && pnpm test` を実行
-3. レビュー前の動作確認 → `pnpm typecheck && pnpm lint && pnpm test` を実行
-4. コード修正後の確認 → `pnpm typecheck && pnpm lint && pnpm test` を実行
-5. ユーザー承認前の最終確認 → `pnpm typecheck && pnpm lint && pnpm test` を実行
-
-**スキル名候補**: quality-check
+（メインエージェントがサブエージェントに依頼するタスクをここに記載）
 
 **対象ファイル**:
-- 作成予定: `skills/quality-check/SKILL.md`
-- 作成予定: `skills/quality-check/README.md`
-- 更新予定: `CLAUDE.md`
+（レビュー対象のファイルパスなどを記載）
 
 **追加指示**:
-- バックエンドとフロントエンドの両方に対応
-- ビルドチェック（`pnpm build`）もオプションで含める
-- テストカバレッジ（`pnpm test -- --coverage`）もオプションで含める
+（特別な注意点があればここに記載）
 
 ---
 
@@ -144,7 +129,7 @@
 1. サブエージェントにタスクを依頼する前に、「現在のタスク」セクションに指示を記載
    - 担当サブエージェントを明記（frontend_developer / backend_developer / typescript_reviewer等）
 2. サブエージェント起動後、「サブエージェント → メインエージェント」セクションを確認
-3. 結果を受け取ったら、履歴に記録（最新の1件のみ保持）してセクションをクリア
+3. 結果を受け取ったら、履歴に記録（最新の３件まで保持）してセクションをクリア
 
 ### 開発サブエージェント（frontend_developer / backend_developer）
 1. 起動時に「メインエージェント → サブエージェント」セクションを確認
