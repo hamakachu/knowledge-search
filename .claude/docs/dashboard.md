@@ -10,38 +10,77 @@
 
 ### メインエージェント → サブエージェント
 
-**タスクステータス**: なし
+**タスクステータス**: スキル作成依頼（動作テスト）
 
-**担当サブエージェント**: （次のタスク時に記載）
+**担当サブエージェント**: skill_creator
 
 **タスク内容**:
-（メインエージェントがサブエージェントに依頼するタスクをここに記載）
+以下の繰り返しパターンをスキル化したい
+
+**繰り返し回数**: 5回以上
+
+**具体例**:
+1. バックエンド実装完了後 → `pnpm typecheck && pnpm lint && pnpm test` を実行
+2. フロントエンド実装完了後 → `pnpm typecheck && pnpm lint && pnpm test` を実行
+3. レビュー前の動作確認 → `pnpm typecheck && pnpm lint && pnpm test` を実行
+4. コード修正後の確認 → `pnpm typecheck && pnpm lint && pnpm test` を実行
+5. ユーザー承認前の最終確認 → `pnpm typecheck && pnpm lint && pnpm test` を実行
+
+**スキル名候補**: quality-check
 
 **対象ファイル**:
-（レビュー対象のファイルパスなどを記載）
+- 作成予定: `skills/quality-check/SKILL.md`
+- 作成予定: `skills/quality-check/README.md`
+- 更新予定: `CLAUDE.md`
 
 **追加指示**:
-（特別な注意点があればここに記載）
+- バックエンドとフロントエンドの両方に対応
+- ビルドチェック（`pnpm build`）もオプションで含める
+- テストカバレッジ（`pnpm test -- --coverage`）もオプションで含める
 
 ---
 
 ### サブエージェント → メインエージェント
 
-**結果ステータス**: なし
+**結果ステータス**: ✅ スキル作成完了
 
-**担当サブエージェント**: （実装完了後に記載）
+**担当サブエージェント**: skill_creator
 
 **実行結果**:
-（サブエージェントの作業結果をここに記載）
+`quality-check` スキルの作成が完了しました。
+
+**作成内容**:
+- 品質チェック（typecheck + lint + test）を一括実行するスキル
+- バックエンド、フロントエンド、sync-workerの全プロジェクトに対応
+- カバレッジチェック、ビルドチェックのオプション対応
 
 **実装/変更ファイル**:
-（作成・変更したファイルのリスト）
+1. `/Users/hiroaki/Documents/GitHub/groovy-knowledge-search/skills/quality-check/SKILL.md` - スキル定義（新規作成）
+2. `/Users/hiroaki/Documents/GitHub/groovy-knowledge-search/skills/quality-check/README.md` - 使用例とドキュメント（新規作成）
+3. `/Users/hiroaki/Documents/GitHub/groovy-knowledge-search/CLAUDE.md` - スキル情報追加（更新）
+
+**スキルの特徴**:
+- **パラメータ対応**:
+  - `target`: all / backend / frontend / sync-worker
+  - `coverage`: true / false（テストカバレッジ）
+  - `build`: true / false（ビルドチェック）
+- **実行フロー**: typecheck → lint → test → (coverage) → (build)
+- **レビュープロセス連携**: typescript_reviewerの必須チェック項目をすべてカバー
+
+**使用方法**:
+```
+/quality-check
+/quality-check target=backend
+/quality-check coverage=true build=true
+```
 
 **問題点**:
-（発見した問題をここに記載）
+なし
 
 **推奨事項**:
-（メインエージェントへの提案をここに記載）
+1. このスキルを実装完了後の動作確認に活用してください
+2. レビュー前は `/quality-check coverage=true build=true` を実行することを推奨
+3. 対象を絞って効率化（例: `target=backend`）も可能です
 
 ---
 

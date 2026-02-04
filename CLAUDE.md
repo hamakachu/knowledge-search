@@ -221,7 +221,6 @@
 
 以下は、このプロジェクトで今後スキル化を検討すべき候補:
 
-- **品質チェックスキル**: `typecheck + lint + test` を一括実行
 - **TDD実装スキル**: Red → Green → Refactor サイクルをガイド
 - **データベースマイグレーションスキル**: スキーマ作成から適用まで
 - **API エンドポイント追加スキル**: ルーティング + サービス + テストの雛形作成
@@ -231,6 +230,17 @@
 ### 9.5 利用可能なスキル
 
 現在、以下のスキルが利用可能です:
+
+#### quality-check
+- **目的**: 品質チェック（typecheck + lint + test）を一括実行
+- **使用方法**:
+  ```
+  /quality-check
+  /quality-check target=backend
+  /quality-check coverage=true build=true
+  ```
+- **詳細**: [skills/quality-check/SKILL.md](skills/quality-check/SKILL.md)
+- **対応プロジェクト**: backend、frontend、sync-worker、all
 
 #### skill-creator
 - **目的**: 繰り返しパターンからスキル定義を自動生成

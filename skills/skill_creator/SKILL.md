@@ -24,7 +24,7 @@ dashboard.mdに記載する内容:
 | タスク内容 | 必須 | スキル化したいタスクの詳細 |
 | 繰り返し回数 | 必須 | 同じタスクが何回発生したか（3回以上推奨） |
 | 具体例 | 必須 | 過去の実行例を2-3個列挙 |
-| スキル名候補 | 任意 | 希望するスキル名（kebab-case） |
+| スキル名候補 | 任意 | 希望するスキル名（snake_case） |
 
 ---
 
@@ -44,8 +44,8 @@ dashboard.mdに記載する内容:
    - 期待される結果: スキル定義の設計書
 
 3. **スキル実装**
-   - `skills/{skill-name}/SKILL.md` を作成
-   - `skills/{skill-name}/README.md` を作成（推奨）
+   - `skills/{skill_name}/SKILL.md` を作成
+   - `skills/{skill_name}/README.md` を作成（推奨）
    - テンプレートに従って記述
    - 期待される結果: スキル定義ファイルの生成
 
@@ -86,8 +86,8 @@ dashboard.mdに記載する内容:
 ```
 
 **期待される出力**:
-- `skills/quality-check/SKILL.md` 作成
-- `skills/quality-check/README.md` 作成
+- `skills/quality_check/SKILL.md` 作成
+- `skills/quality_check/README.md` 作成
 - `CLAUDE.md` にスキル情報追加
 - dashboard.mdに結果報告
 
@@ -113,8 +113,8 @@ dashboard.mdに記載する内容:
 ```
 
 **期待される出力**:
-- `skills/api-endpoint-add/SKILL.md` 作成
-- `skills/api-endpoint-add/README.md` 作成
+- `skills/api_endpoint_add/SKILL.md` 作成
+- `skills/api_endpoint_add/README.md` 作成
 - `CLAUDE.md` にスキル情報追加
 - dashboard.mdに結果報告
 
