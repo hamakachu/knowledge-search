@@ -187,7 +187,32 @@ TDD実装 → レビュー依頼 → レビュー実行 → 修正 or ユーザ�
 
 **注**: 過去のやり取りの履歴は `.claude/docs/archives.md` に記録されています。
 
-### 10.1 実装完了した機能
+### 10.1 次のタスク（優先度: 最高）
+
+**Qiita Team sync-workerのDB upsert処理実装**
+
+**目的**: Qiita Teamから取得した記事をPostgreSQLのdocumentsテーブルにupsert（挿入・更新）する処理を実装
+
+**実装内容**:
+1. sync-worker/src/sync-qiita.ts のTODO部分を実装
+2. documentsテーブルへのupsert処理（`INSERT ... ON CONFLICT UPDATE`）
+3. TDDでテストを先に書く
+4. 初回データ投入の実行と動作確認
+
+**技術要件**:
+- PostgreSQLクライアント（pg）を使用
+- トランザクション処理
+- エラーハンドリング
+
+**実装時の注意**:
+- TDD徹底（Red → Green → Refactor）
+- backend_developer サブエージェントを活用
+- dashboard.mdを通じてエージェント連携
+- 実装完了後は typescript_reviewer によるレビューを実施
+
+---
+
+### 10.2 実装完了した機能
 
 #### ドキュメント統計情報表示機能（✅ 完了 - 2026-02-04）
 - バックエンド: `GET /api/stats` エンドポイント
@@ -196,14 +221,12 @@ TDD実装 → レビュー依頼 → レビュー実行 → 修正 or ユーザ�
 
 ---
 
-### 10.2 次期実装候補
+### 10.3 今後の実装候補
 
-1. **Qiita Team連携（sync-worker）**: 記事同期、スケジュール実行
-2. **検索機能**: 全文検索API（`pg_trgm`）、検索UI
+1. **Sync Worker cron設定**: 日次自動同期
+2. **検索機能の統合テスト**: E2E動作確認
 3. **検索拡張**: フィルタリング、ソート、ページネーション
 4. **ユーザー認証**: ログイン、トークン管理
-
-**実装時は TDD、サブエージェント活用、dashboard.md連携、typescript_reviewer レビューを遵守。**
 
 ---
 
