@@ -29,29 +29,11 @@ USE_MOCK_QIITA=true  # 開発時
 
 ### 3. クライアント実装に分岐を追加
 
-```typescript
-async fetchArticles(): Promise<QiitaArticle[]> {
-  // 環境変数でモック/実API切り替え
-  if (process.env.USE_MOCK_QIITA === 'true') {
-    const fixtureData = await import('../__fixtures__/qiita-articles.json');
-    return fixtureData.default as QiitaArticle[];
-  }
-
-  // 実際のAPI呼び出し
-  const response = await fetch(url, { ... });
-  return await response.json();
-}
-```
+環境変数 `USE_MOCK_QIITA=true` でフィクスチャデータを返す。`false` で実際のAPIを呼び出す。
 
 ### 4. tsconfig.jsonの設定
 
-```json
-{
-  "compilerOptions": {
-    "resolveJsonModule": true  // JSONファイルのimportを許可
-  }
-}
-```
+`"resolveJsonModule": true` を追加してJSONインポートを許可。
 
 ---
 

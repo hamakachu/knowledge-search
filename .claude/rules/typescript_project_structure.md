@@ -9,25 +9,7 @@
 - プロダクションコードとテストコードが同じディレクトリツリー内に存在
 - ビルド時の扱いが明確になる
 
-**良い例**:
-```
-backend/
-├── src/
-│   ├── __tests__/        ✅ テストはsrc配下
-│   │   └── search.test.ts
-│   └── services/
-│       └── searchService.ts
-```
-
-**悪い例**:
-```
-backend/
-├── __tests__/            ❌ src外にテストを配置
-│   └── search.test.ts
-└── src/
-    └── services/
-        └── searchService.ts
-```
+✅ `src/__tests__/` 配下に配置、❌ `src` 外に配置
 
 ---
 
@@ -35,32 +17,10 @@ backend/
 
 **原則**: 「その場しのぎ」の修正は避け、根本原因を解決する
 
-**NG例（その場しのぎ）**:
-```typescript
-// 使わない変数に _ プレフィックスを付けるだけ
-import { _dbClient } from './db/client';  // ❌
+❌ 使わない変数に `_` プレフィックスを付けるだけ
+✅ 必要になるまでimportしない（実装時に追加）
 
-export async function searchDocuments(query: string) {
-  // dbClientを使わないのにimportしている
-  return [];
-}
-```
-
-**OK例（根本解決）**:
-```typescript
-// 必要になるまでimportしない
-export async function searchDocuments(query: string) {
-  // TODO: データベース実装時に dbClient をimport
-  console.log('Search query:', query);
-  return [];
-}
-```
-
-**原則**:
-1. 実装が未完成の場合、使わない変数はimportしない
-2. 実装時に必要になったタイミングでimportする
-3. `_` プレフィックスは、Expressのコールバック等で慣習的に使われる場合のみ使用
-   - 例: `app.get('/health', (_req, res) => { ... })`
+`_` プレフィックスは慣習的な場合のみ使用（例: `app.get('/health', (_req, res) => { ... })`）
 
 ---
 
@@ -68,20 +28,5 @@ export async function searchDocuments(query: string) {
 
 ### 問題: TypeScript型チェックエラー「テストファイルがrootDirの外にある」
 
-**その場しのぎ（NG）**:
-```json
-// tsconfig.jsonから rootDir を削除するだけ
-{
-  "compilerOptions": {
-    // "rootDir": "./src"  削除
-  }
-}
-```
-
-**根本解決（OK）**:
-```bash
-# テストファイルの配置場所を修正
-__tests__/ → src/__tests__/
-
-# これにより、TypeScriptのベストプラクティスに準拠
-```
+❌ tsconfig.jsonから `rootDir` を削除するだけ
+✅ テストファイルを `src/__tests__/` へ移動（TypeScriptベストプラクティス準拠）
