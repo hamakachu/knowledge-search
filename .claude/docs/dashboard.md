@@ -31,45 +31,18 @@
 
 ### サブエージェント → メインエージェント
 
-**結果ステータス**: ✅ スキル作成完了
+**結果ステータス**: 待機中
 
-**担当サブエージェント**: skill_creator
+**担当サブエージェント**: （サブエージェント起動後に記載）
 
 **実行結果**:
-`quality-check` スキルの作成が完了しました。
-
-**作成内容**:
-- 品質チェック（typecheck + lint + test）を一括実行するスキル
-- バックエンド、フロントエンド、sync-workerの全プロジェクトに対応
-- カバレッジチェック、ビルドチェックのオプション対応
-
-**実装/変更ファイル**:
-1. `/Users/hiroaki/Documents/GitHub/groovy-knowledge-search/skills/quality-check/SKILL.md` - スキル定義（新規作成）
-2. `/Users/hiroaki/Documents/GitHub/groovy-knowledge-search/skills/quality-check/README.md` - 使用例とドキュメント（新規作成）
-3. `/Users/hiroaki/Documents/GitHub/groovy-knowledge-search/CLAUDE.md` - スキル情報追加（更新）
-
-**スキルの特徴**:
-- **パラメータ対応**:
-  - `target`: all / backend / frontend / sync-worker
-  - `coverage`: true / false（テストカバレッジ）
-  - `build`: true / false（ビルドチェック）
-- **実行フロー**: typecheck → lint → test → (coverage) → (build)
-- **レビュープロセス連携**: typescript_reviewerの必須チェック項目をすべてカバー
-
-**使用方法**:
-```
-/quality-check
-/quality-check target=backend
-/quality-check coverage=true build=true
-```
+（サブエージェント起動後に結果を記載）
 
 **問題点**:
-なし
+（サブエージェント起動後に記載）
 
 **推奨事項**:
-1. このスキルを実装完了後の動作確認に活用してください
-2. レビュー前は `/quality-check coverage=true build=true` を実行することを推奨
-3. 対象を絞って効率化（例: `target=backend`）も可能です
+（サブエージェント起動後に記載）
 
 ---
 
@@ -112,6 +85,22 @@
 ---
 
 ## 履歴
+
+### [2026-02-05] - plan-and-commitスキル作成完了
+- **発信**: メインエージェント
+- **内容**: 実装計画立案フローのスキル化を skill_creator に依頼
+- **結果**: ✅ スキル作成完了
+- **成果**:
+  - `plan-and-commit` スキルの作成完了
+  - Plan Mode → Explore → Plan → Plan File作成 → .claude/docs配下にコピーの標準フロー確立
+  - 実装計画書のテンプレート構成の定義（10セクション構成）
+  - パラメータ対応（task_description, plan_filename, skip_explore）
+  - CLAUDE.mdのスキル化セクションに追加
+  - スキル定義ファイル（SKILL.md）とドキュメント（README.md）の作成
+- **作成ファイル**:
+  - `skills/plan-and-commit/SKILL.md`
+  - `skills/plan-and-commit/README.md`
+  - `CLAUDE.md`（更新）
 
 ### [2026-02-04] - データベース統合実装承認・完了
 - **発信**: メインエージェント

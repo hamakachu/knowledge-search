@@ -168,6 +168,16 @@ TDD実装 → レビュー依頼 → レビュー実行 → 修正 or ユーザ�
 - **詳細**: [skills/quality-check/SKILL.md](skills/quality-check/SKILL.md)
 - **対応プロジェクト**: backend、frontend、sync-worker、all
 
+#### plan-and-commit
+- **目的**: 実装前に詳細な実装計画を立て、プランファイルを `.claude/docs/` 配下にコミット
+- **使用方法**:
+  ```
+  /plan-and-commit task_description="実装するタスクの概要"
+  /plan-and-commit task_description="DB upsert処理の実装" plan_filename="db-upsert-plan.md"
+  ```
+- **詳細**: [skills/plan-and-commit/SKILL.md](skills/plan-and-commit/SKILL.md)
+- **実行フロー**: Plan Mode起動 → Explore Agent → Plan Agent → Plan File作成 → ユーザーレビュー → コピー & コミット
+
 #### skill-creator
 - **目的**: 繰り返しパターンからスキル定義を自動生成
 - **使用方法**:
