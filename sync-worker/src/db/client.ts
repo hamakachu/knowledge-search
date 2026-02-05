@@ -1,4 +1,14 @@
 import pg from 'pg';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// ESモジュールで__dirnameを取得
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// プロジェクトルートの.envファイルを読み込む
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const { Pool } = pg;
 

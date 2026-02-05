@@ -199,30 +199,37 @@ TDD実装 → レビュー依頼 → レビュー実行 → 修正 or ユーザ�
 
 ### 10.1 次のタスク（優先度: 最高）
 
-**Qiita Team sync-workerのDB upsert処理実装**
+**Qiita Team sync-worker トランザクション実装（優先度2）**
 
-**目的**: Qiita Teamから取得した記事をPostgreSQLのdocumentsテーブルにupsert（挿入・更新）する処理を実装
+**目的**: 現在1件ずつupsertしている処理を、トランザクションによる一括処理に改善し、パフォーマンスを向上させる
 
 **実装内容**:
-1. sync-worker/src/sync-qiita.ts のTODO部分を実装
-2. documentsテーブルへのupsert処理（`INSERT ... ON CONFLICT UPDATE`）
+1. `sync-worker/src/db/documentRepository.ts` に `upsertQiitaArticles()` メソッドを追加
+2. トランザクション内で複数記事を一括upsert
 3. TDDでテストを先に書く
-4. 初回データ投入の実行と動作確認
+4. sync-qiita.tsをリファクタリングして一括処理を使用
 
 **技術要件**:
-- PostgreSQLクライアント（pg）を使用
-- トランザクション処理
-- エラーハンドリング
+- トランザクション処理（BEGIN/COMMIT/ROLLBACK）
+- エラー時の部分的な成功処理
+- 詳細なエラーメッセージ
 
 **実装時の注意**:
 - TDD徹底（Red → Green → Refactor）
+- `.claude/docs/plan.md` の優先度2を参照
 - backend_developer サブエージェントを活用
-- dashboard.mdを通じてエージェント連携
 - 実装完了後は typescript_reviewer によるレビューを実施
 
 ---
 
 ### 10.2 実装完了した機能
+
+#### Qiita Team sync-worker DB upsert処理（優先度1 - MVP）（✅ 完了 - 2026-02-05）
+- documentRepositoryパターンの実装（upsertDocument()メソッド）
+- ON CONFLICT句による安全なupsert処理
+- TDDによる包括的なテストカバレッジ（7件すべて成功）
+- モックデータのDB投入と冪等性確認完了
+- 将来の改善課題: 優先度2でトランザクション実装によるバッチ処理化
 
 #### ドキュメント統計情報表示機能（✅ 完了 - 2026-02-04）
 - バックエンド: `GET /api/stats` エンドポイント
