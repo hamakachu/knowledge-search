@@ -1,4 +1,4 @@
-# Groovy Knowledge Search
+# Knowledge Search
 
 社内ドキュメント(Qiita Team / Google Drive / OneDrive)を横断検索できるアプリケーション
 
@@ -17,7 +17,7 @@ MVP段階では **Qiita Team** のみに対応
 ## システム構成
 
 ```
-groovy-knowledge-search/          # pnpm workspace (monorepo)
+knowledge-search/          # pnpm workspace (monorepo)
 ├── backend/                      # Express.js API サーバー (TypeScript)
 ├── frontend/                     # React + Vite UI (TypeScript)
 ├── sync-worker/                  # Qiita Team データ同期バッチ (TypeScript)
@@ -92,7 +92,7 @@ Qiita Team連携機能を使用する場合、Personal Access Tokenが必要で�
 1. Qiita Teamにログインします
 2. https://qiita.com/settings/tokens にアクセス
 3. 「新しいトークンを発行する」ボタンをクリック
-4. トークンの説明を入力（例: `groovy-knowledge-search`）
+4. トークンの説明を入力（例: `knowledge-search`）
 5. スコープで **`read_qiita`** を選択
 6. 「発行する」ボタンをクリック
 7. 表示されたトークンをコピー（⚠️ この画面を閉じると二度と表示されません）
@@ -127,7 +127,7 @@ QIITA_TEAM_NAME=your-company
 
 | 変数名 | 説明 | 設定例 | 必須 |
 |--------|------|--------|------|
-| `DATABASE_URL` | PostgreSQL接続URL | `postgresql://postgres:postgres@localhost:5432/groovy_knowledge_search` | ✅ |
+| `DATABASE_URL` | PostgreSQL接続URL | `postgresql://postgres:postgres@localhost:5432/knowledge_search` | ✅ |
 | `PORT` | Backend APIポート番号 | `3000` | ✅ |
 | `NODE_ENV` | 実行環境 | `development` / `production` | ✅ |
 | `QIITA_TEAM_TOKEN` | Qiita Team APIトークン | `qiita_xxxxx...` | ✅ |
@@ -167,7 +167,7 @@ cat sync-worker/.env | grep QIITA_TEAM_TOKEN
 docker-compose ps
 
 # 接続テスト
-psql postgresql://postgres:postgres@localhost:5432/groovy_knowledge_search -c "SELECT 1"
+psql postgresql://postgres:postgres@localhost:5432/knowledge_search -c "SELECT 1"
 ```
 
 **Q. 環境変数が読み込まれない**
@@ -193,7 +193,7 @@ docker-compose up -d postgres
 
 ```bash
 # Dockerコンテナ経由で実行
-docker exec -i groovy-knowledge-search-db psql -U postgres -d groovy_knowledge_search < database/schema.sql
+docker exec -i knowledge-search-db psql -U postgres -d knowledge_search < database/schema.sql
 ```
 
 ### 6. 初回データ同期
