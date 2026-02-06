@@ -1,378 +1,253 @@
-# Qiita Team sync-worker DB Upsert処理実装計画
+# 権限管理実装計画ログ（2026-02-06）
 
-## 概要
+## 背景と質問
 
-**目的**: Qiita Teamから取得した記事をPostgreSQLのdocumentsテーブルにupsert（挿入・更新）する処理を実装する
+**質問**: 「ユーザーによって、記事の閲覧権限が違ってくる。データベースに全ての記事を同期して保存しておく方針では、データベースにアクセスすることで権限外の記事を閲覧できてしまう。権限外の記事を検索にかからなくするためには、どのような方法がある？」
 
-**実装箇所**: `sync-worker/src/sync-qiita.ts` の行12（TODO部分）
-
-**技術要件**:
-- PostgreSQLクライアント（pg）を使用
-- トランザクション処理によるデータ一貫性の保証
-- 詳細なエラーハンドリング
-- TDD（Test-Driven Development）の徹底
+**採用アプローチ**: 「DB検索 + API権限チェック」
 
 ---
 
 ## 実装アプローチ
 
-### Repository パターンの採用
+1. PostgreSQL全文検索で候補記事を高速抽出
+2. ユーザー認証とQiita Teamトークン管理（暗号化保存）
+3. 検索結果をユーザーのトークンでQiita Team APIに権限確認（並列処理）
+4. 権限のある記事のみをフィルタリングして返却
 
-**理由**:
-1. **関心の分離**: 同期ロジックとDB操作を分離
-2. **テスタビリティ**: Repository単体でテスト可能
-3. **再利用性**: 将来的に他のソース（Google Drive、OneDrive）でも同じRepositoryを使用可能
-4. **保守性**: DB操作の変更が同期ロジックに影響しない
+**推定実装期間**: MVP 2週間、完全版 4-5週間
 
-**ファイル構成**:
+---
+
+## システムフロー
+
 ```
-sync-worker/src/
-  ├── db/
-  │   ├── client.ts              (既存)
-  │   └── documentRepository.ts  (新規作成)
-  ├── sync-qiita.ts              (TODO部分を実装)
-  └── __tests__/
-      ├── sync-qiita.test.ts      (テスト追加)
-      └── documentRepository.test.ts (新規作成)
+[ユーザー]
+  ↓ (1) ログイン（Qiita Teamトークン入力）
+[Frontend] → [Backend: POST /api/auth/login]
+  ↓ (2) トークン暗号化保存、セッション作成
+[Backend] → PostgreSQL users テーブル
+  ↓ (3) 検索リクエスト
+[Frontend] → [Backend: GET /api/search?q=keyword]
+  ↓ (4) DB全文検索（pg_trgm）
+[Backend] → PostgreSQL documents テーブル（候補記事抽出）
+  ↓ (5) 権限チェック（並列API呼び出し）
+[Backend] → Qiita Team API (GET /items/:id)
+  ↓ (6) 200 OK → アクセス可 / 404 → 権限なし
+[Backend] → フィルタリング
+  ↓ (7) 権限のある記事のみ
+[Frontend] ← 検索結果表示
 ```
 
 ---
 
-## 実装の詳細
+## 段階的実装計画
 
-### 1. documentRepository.ts の実装
+### Phase 1: 基本認証とトークン管理（Week 1-2）
+- DBスキーマ拡張（users, sessionsテーブル）
+- トークン暗号化（AES-256-GCM）
+- 認証サービス（authService.ts）
+- セッション管理（express-session + PostgreSQL）
+- 認証エンドポイント（POST /login, GET /me, POST /logout）
+- 認証ミドルウェア（requireAuth）
+- ログインUI（LoginForm.tsx）
 
-**責務**: documentsテーブルへのupsert処理を提供
+### Phase 2: PostgreSQL全文検索実装（Week 2）
+- searchService.ts実装（pg_trgm + LIKE検索）
+- 検索エンドポイントの認証保護
 
-**主要な型定義**:
-```typescript
-interface DocumentInput {
-  id: string;
-  title: string;
-  body: string;
-  url: string;
-  author: string;
-  source: 'qiita_team' | 'google_drive' | 'onedrive';
-  created_at: Date;
-  updated_at: Date;
-}
+### Phase 3: API権限チェック実装（Week 3）
+- QiitaClient拡張（checkArticleAccess, checkBatchAccessメソッド）
+- permissionService.ts（権限フィルタリング）
+- 検索エンドポイントへの統合
 
-interface UpsertResult {
-  upsertedCount: number;
-  errors: string[];
-}
-```
+### Phase 4: パフォーマンス最適化（Week 4）
+- インメモリキャッシュ（node-cache、5分TTL）
+- レート制限（express-rate-limit、60req/min/user）
+- バッチサイズ最適化（10並列API呼び出し）
 
-**主要メソッド**:
-```typescript
-// 単一記事のupsert
-async upsertDocument(document: DocumentInput): Promise<void>
+### Phase 5: セキュリティとログ強化（Week 4-5）
+- Helmet.js（セキュリティヘッダ）
+- 構造化ログ（winston）
+- グローバルエラーハンドラ
+- E2Eテスト
 
-// 複数記事の一括upsert（トランザクション使用）
-async upsertQiitaArticles(documents: DocumentInput[]): Promise<UpsertResult>
-```
+---
 
-**Upsert SQL（主キー判定）**:
-```sql
-INSERT INTO documents (id, title, body, url, author, source, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-ON CONFLICT (id)
-DO UPDATE SET
-  title = EXCLUDED.title,
-  body = EXCLUDED.body,
-  url = EXCLUDED.url,
-  author = EXCLUDED.author,
-  updated_at = EXCLUDED.updated_at,
-  synced_at = CURRENT_TIMESTAMP
-```
+## セキュリティ対策
 
-**トランザクション処理**:
-```typescript
-const client = await dbClient.connect();
-try {
-  await client.query('BEGIN');
+### トークン保護
+- AES-256-GCM暗号化（認証付き暗号化）
+- ランダムIV（初期化ベクター）
+- 環境変数ENCRYPTION_KEYで鍵管理
+- DBから取得時のみ復号化
+- APIレスポンスにトークンを含めない
 
-  for (const doc of documents) {
-    await client.query(upsertSQL, [params]);
-  }
+### セッション管理
+- PostgreSQLバックエンドストレージ
+- Secure cookies（HTTPS環境）
+- HttpOnly cookies（XSS対策）
+- SameSite=Lax（CSRF対策）
+- 7日間の有効期限
 
-  await client.query('COMMIT');
-  return { upsertedCount: documents.length, errors: [] };
-} catch (error) {
-  await client.query('ROLLBACK');
-  throw error;
-} finally {
-  client.release();
-}
-```
+### 入力検証
+- 検索クエリ最大長チェック（1000文字）
+- SQLインジェクション対策（パラメータ化クエリ）
+- XSS対策（エスケープ処理）
 
-### 2. sync-qiita.ts の実装
+### レート制限
+- 検索: 60リクエスト/分/ユーザー
+- ログイン: 5リクエスト/15分/IP
+- Qiita Team API: 10並列制限
 
-**TODO部分（行12）の実装内容**:
-```typescript
-// QiitaArticle[] → DocumentInput[] への変換
-const documentsToUpsert: DocumentInput[] = articles.map(article => ({
-  id: article.id,
-  title: article.title,
-  body: article.body,
-  url: article.url,
-  author: article.user.id,
-  source: 'qiita_team' as const,
-  created_at: new Date(article.created_at),
-  updated_at: new Date(article.updated_at),
-}));
+---
 
-// Repository経由でupsert
-const result = await documentRepository.upsertQiitaArticles(documentsToUpsert);
-console.log(`Upserted ${result.upsertedCount} articles`);
+## パフォーマンス戦略
 
-if (result.errors.length > 0) {
-  console.error('Some articles failed to upsert:', result.errors);
-  throw new Error(`Failed to upsert ${result.errors.length} articles`);
-}
+### DB検索最適化
+- GINインデックス（pg_trgm）活用
+- LIMIT 100件で結果数制限
+- similarity()関数で関連度スコアリング
+
+### API権限チェック最適化
+- Promise.all()で並列API呼び出し
+- バッチサイズ: 10件/バッチ
+- インメモリキャッシュ（5分TTL）
+- キャッシュヒット率目標: 70%以上
+
+### 推定パフォーマンス
+- DB検索（1000件）: < 100ms
+- 権限チェック（10件、キャッシュなし）: < 1秒
+- 権限チェック（10件、キャッシュあり）: < 50ms
+- 権限チェック（100件、キャッシュなし）: < 3秒
+
+---
+
+## Critical Files（実装の重要ファイル）
+
+### 最優先（Week 1-2）
+1. `database/migrations/002_add_users_and_sessions.sql` - DBスキーマ基盤
+2. `backend/src/utils/encryption.ts` - トークン暗号化の要
+3. `backend/src/services/authService.ts` - 認証ロジックの中核
+4. `backend/src/middleware/session.ts` - セッション管理
+5. `backend/src/middleware/auth.ts` - 認証ミドルウェア
+6. `backend/src/routes/auth.ts` - 認証エンドポイント
+
+### 次に優先（Week 2-3）
+7. `backend/src/services/searchService.ts` - 全文検索実装
+8. `sync-worker/src/clients/qiitaClient.ts` - 権限チェックメソッド追加
+9. `backend/src/services/permissionService.ts` - 権限フィルタリングの中核
+10. `backend/src/routes/search.ts` - 検索エンドポイント修正
+
+### フロントエンド
+11. `frontend/src/hooks/useAuth.ts` - 認証状態管理
+12. `frontend/src/components/LoginForm.tsx` - ログインUI
+
+---
+
+## 環境変数
+
+```bash
+# backend/.env に追加
+SESSION_SECRET=<32文字以上のランダム文字列>
+ENCRYPTION_KEY=<32バイトのHEX文字列（64文字）>
+
+# 生成方法
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ---
 
-## TDD実装フロー（Red → Green → Refactor）
+## 依存パッケージ
 
-### Phase 1: documentRepository.test.ts の実装
-
-**Test 1**: `upsertDocument_新規記事_正常に挿入される`
-- 新規記事をupsertし、DBに正しく保存されることを確認
-
-**Test 2**: `upsertDocument_既存記事_正常に更新される`
-- 既存記事をupsertし、title、body、updated_atが更新されることを確認
-
-**Test 3**: `upsertQiitaArticles_複数記事_トランザクション成功`
-- 複数記事を一括upsertし、すべてが正しく保存されることを確認
-
-**Test 4**: `upsertDocument_DB接続エラー_例外をスローする`
-- 不正なデータ（NOT NULL制約違反）を渡し、例外がスローされることを確認
-
-**Test 5**: `upsertDocument_synced_atが自動更新される`
-- upsert時にsynced_atが現在時刻に更新されることを確認
-
-### Phase 2: documentRepository.ts の実装（Green）
-
-1. DocumentInput型、UpsertResult型を定義
-2. upsertDocument()メソッドを実装（単一記事のupsert）
-3. テスト1,2,4,5をパス
-4. upsertQiitaArticles()メソッドを実装（トランザクション使用）
-5. テスト3をパス
-
-### Phase 3: sync-qiita.test.ts の実装
-
-**Test 6**: `syncQiitaTeam_正常系_記事がDBにupsertされる`
-- syncQiitaTeam()を実行し、フィクスチャデータがDBに保存されることを確認
-
-**Test 7**: `syncQiitaTeam_重複実行_冪等性が保証される`
-- 2回実行しても記事数が変わらないことを確認（重複挿入されない）
-
-**Test 8**: `syncQiitaTeam_記事更新_synced_atが更新される`
-- 再度同期を実行し、synced_atが更新されることを確認
-
-### Phase 4: sync-qiita.ts の実装（Green）
-
-1. documentRepositoryをインポート
-2. QiitaArticle → DocumentInput への変換ロジックを実装
-3. upsertQiitaArticles()呼び出し
-4. 結果のログ出力とエラーハンドリング
-
-### Phase 5: Refactor
-
-- テストヘルパー関数の抽出（例: getDocumentCount）
-- 共通エラーハンドリングの整理
-- マジックナンバーの定数化
-
----
-
-## エラーハンドリング
-
-### 1. DB接続エラー
-```typescript
-catch (error) {
-  if (error.code === 'ECONNREFUSED') {
-    console.error('Database connection refused. Is PostgreSQL running?');
-    throw new Error('Database connection failed');
-  }
-}
+### Backend新規追加
+```bash
+pnpm add express-session connect-pg-simple node-cache express-rate-limit helmet winston
+pnpm add -D @types/express-session @types/connect-pg-simple @types/node-cache
 ```
 
-### 2. クエリ実行エラー
-```typescript
-catch (error) {
-  if (error.code === '23505') {  // unique_violation
-    console.error('Duplicate document detected');
-  }
-  if (error.code === '23502') {  // not_null_violation
-    console.error('Required field is missing');
-  }
-  throw new Error(`Database query failed: ${error.message}`);
-}
-```
-
-### 3. トランザクションエラー
-```typescript
-catch (error) {
-  await client.query('ROLLBACK');
-  console.error('Transaction rolled back due to error:', error);
-  return {
-    upsertedCount: 0,
-    errors: [error.message],
-  };
-}
-```
-
-### 4. Date型の変換エラー
-```typescript
-try {
-  created_at: new Date(article.created_at),
-} catch (error) {
-  console.error('Invalid date format:', article.created_at);
-  // デフォルト値を使用またはスキップ
-}
+### Frontend新規追加
+```bash
+pnpm add react-router-dom
+pnpm add -D @types/react-router-dom
 ```
 
 ---
 
-## 実装の優先順位
+## リスクと軽減策
 
-### 優先度1: 最小限の動作実装（MVP）
-1. documentRepository.ts の基本実装（upsertDocument単体）
-2. documentRepository.test.ts のテスト1,2,4
-3. sync-qiita.ts の TODO部分実装（単純なループ処理）
-4. sync-qiita.test.ts のテスト6
+### リスク1: Qiita Team APIのレート制限
+- **軽減策**: キャッシュ（5分TTL）、バッチサイズ制限（10並列）、検索結果上限（100件）
 
-**目標**: 1記事ずつupsertできる状態にする
+### リスク2: パフォーマンス劣化
+- **軽減策**: 並列API呼び出し、キャッシュレイヤー、GINインデックス活用
 
-### 優先度2: トランザクション実装
-1. upsertQiitaArticles()メソッドの実装
-2. documentRepository.test.ts のテスト3
-3. sync-qiita.ts のリファクタリング（一括upsert使用）
-4. sync-qiita.test.ts のテスト7,8
+### リスク3: トークン漏洩
+- **軽減策**: AES-256-GCM暗号化、環境変数管理、セキュアなセッション管理
 
-**目標**: 複数記事を一括でトランザクション処理できる
-
-### 優先度3: エラーハンドリング強化
-1. 詳細なエラーメッセージ
-2. 部分的な成功の処理（一部の記事だけ失敗した場合）
-3. リトライロジック（オプション）
+### リスク4: セッションストレージ肥大化
+- **軽減策**: 7日自動期限切れ、定期クリーンアップジョブ、モニタリング
 
 ---
 
-## Critical Files
+## 検証方法
 
-実装に最も重要な3ファイル:
+### E2Eテストシナリオ
+1. ログイン → Qiita Teamトークン入力 → セッション作成確認
+2. 検索実行 → DB全文検索動作 → 権限チェック実行確認
+3. 権限フィルタリング → 権限のある記事のみ返却確認
+4. ログアウト → セッション削除 → 再検索時に401エラー確認
 
-### 1. sync-worker/src/db/documentRepository.ts（新規作成）
-- documentsテーブルへのupsert処理を実装する中核ファイル
-- トランザクション管理、エラーハンドリング、型定義を含む
+### パフォーマンステスト
+- DB検索: 1000件で < 100ms
+- 権限チェック（キャッシュなし）: 10件 < 1秒、100件 < 3秒
+- 権限チェック（キャッシュあり）: < 50ms
 
-### 2. sync-worker/src/sync-qiita.ts（行12を実装）
-- QiitaArticleをDocumentInputに変換
-- documentRepositoryを呼び出す同期ロジックを追加
-
-### 3. sync-worker/src/__tests__/documentRepository.test.ts（新規作成）
-- upsertDocument, upsertQiitaArticlesの単体テスト
-- TDDのRedフェーズで先に作成し、Greenフェーズで実装をパスさせる
-
-**参考ファイル**:
-- backend/src/services/statsService.ts（DBクエリパターン、エラーハンドリングの参考）
-- backend/src/__tests__/stats.test.ts（テストパターンの参考）
-
----
-
-## Verification（検証手順）
-
-### 1. テスト実行
-```bash
-cd sync-worker
-pnpm test
-```
-**期待結果**: すべてのテストがパス
-
-### 2. テストカバレッジ確認
-```bash
-pnpm test:coverage
-```
-**期待結果**:
-- documentRepository.ts: 90%以上
-- sync-qiita.ts: 80%以上
-
-### 3. 型チェック
-```bash
-pnpm typecheck
-```
-**期待結果**: 型エラーなし
-
-### 4. Lint
-```bash
-pnpm lint
-```
-**期待結果**: Lintエラーなし
-
-### 5. 実際の同期実行（モックデータ）
-```bash
-USE_MOCK_QIITA=true pnpm sync
-```
-**期待結果**:
-- コンソールに `Fetched 3 articles` と表示
-- コンソールに `Upserted 3 articles` と表示
-- エラーなし
-
-### 6. DB確認
-```bash
-psql -U postgres -d groovy_knowledge_search
-```
-```sql
-SELECT COUNT(*) FROM documents WHERE source = 'qiita_team';
--- 期待結果: 3件
-
-SELECT id, title, author, synced_at FROM documents WHERE source = 'qiita_team';
--- 期待結果: フィクスチャデータの3件が表示される
-```
-
-### 7. 冪等性の確認
-```bash
-# 2回実行
-USE_MOCK_QIITA=true pnpm sync
-USE_MOCK_QIITA=true pnpm sync
-```
-**期待結果**:
-- 2回目も `Upserted 3 articles` と表示
-- DBの件数は3件のまま（重複挿入されない）
-- synced_atが更新されている
-
-### 8. エンドツーエンドの動作確認
-1. sync-workerでデータを同期
-2. backendのAPIで統計情報を取得: `GET http://localhost:5001/api/stats`
-3. 統計情報にQiita Teamの記事数が反映されていることを確認
+### セキュリティチェック
+- [ ] トークンがDBで暗号化されている
+- [ ] セッションがSecure/HttpOnly/SameSiteクッキー
+- [ ] SQLインジェクション対策（パラメータ化クエリ）
+- [ ] レート制限が動作
+- [ ] 未認証時に401エラー
 
 ---
 
-## 実装後のコミットメッセージ（参考）
+## 次のステップ
 
-```
-Implement DB upsert logic for Qiita Team sync-worker
+### 実装開始前の準備
+1. 環境変数生成（SESSION_SECRET, ENCRYPTION_KEY）
+2. 依存パッケージインストール
+3. DBマイグレーション実行
+4. Qiita Team API確認（read_qiita_teamスコープのトークン準備）
 
-- Add documentRepository.ts with upsert methods
-- Implement transaction-based batch upsert
-- Add comprehensive tests for repository and sync logic
-- Use TDD approach (Red → Green → Refactor)
-- Ensure idempotency with ON CONFLICT handling
-- Add error handling for DB operations
+### 実装順序（TDD徹底）
+- Week 1: Phase 1（認証基盤）
+- Week 2: Phase 2-3（検索と権限）
+- Week 3: 統合テストとバグ修正
+- Week 4-5: Phase 4-5（最適化とセキュリティ）
 
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
-```
+---
+
+## ステータス
+
+**状態**: プラン作成完了、実装待ち
+**作成日**: 2026-02-06
+**詳細プラン**: `/Users/hiroaki/.claude/plans/memoized-sniffing-hopcroft.md`
+**次のアクション**: ユーザーの承認待ち（実装するかどうか）
 
 ---
 
 ## まとめ
 
-- **TDD徹底**: Red → Green → Refactor サイクルを守る
-- **Repository パターン**: 関心の分離、テスタビリティ、再利用性
-- **トランザクション使用**: データ一貫性の保証
-- **主キー(id)でCONFLICT判定**: シンプルで高速
-- **詳細なエラーハンドリング**: 本番運用を見据えた実装
-- **既存パターンの踏襲**: dbClient.query、テストパターン、エージェント連携（dashboard.md）
+この計画により、**ユーザーが閲覧権限を持つQiita Team記事のみ**を検索結果で表示できるようになります。
+
+**重要原則**:
+- TDD徹底（Red → Green → Refactor）
+- セキュリティファースト（トークン暗号化、セッション管理）
+- パフォーマンス意識（キャッシュ、並列処理、GINインデックス）
+- 段階的実装（MVP → v1.0）
+
+**検証済み設計**:
+- Qiita Team API仕様準拠（200 OK = アクセス可、404 = 権限なし）
+- 既存のdocumentRepositoryパターンを踏襲
+- PostgreSQL全文検索インデックス活用（pg_trgm）

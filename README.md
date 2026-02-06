@@ -1,6 +1,6 @@
 # Groovy Knowledge Search
 
-社内ドキュメント(Qiita Team / Google Drive / OneDrive)を横断検索できるアプリケーション
+社内ドキュメント(Qiita Team / Google Drive / SharePointなど)を横断検索できるアプリケーション
 
 ## 概要
 

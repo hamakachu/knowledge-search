@@ -9,6 +9,19 @@ export const dbClient = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
+/**
+ * データベースクエリを実行
+ * @param text - SQLクエリ文字列
+ * @param params - クエリパラメータ
+ * @returns クエリ結果
+ */
+export async function query<T extends pg.QueryResultRow = pg.QueryResultRow>(
+  text: string,
+  params?: unknown[]
+): Promise<pg.QueryResult<T>> {
+  return dbClient.query<T>(text, params);
+}
+
 export async function testConnection(): Promise<boolean> {
   try {
     const client = await dbClient.connect();
