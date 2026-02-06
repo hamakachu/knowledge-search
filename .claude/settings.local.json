@@ -5,7 +5,11 @@
       "Bash(pnpm typecheck:*)",
       "Bash(pnpm lint:*)",
       "Bash(pnpm build:*)",
-      "Bash(docker-compose ps:*)"
+      "Bash(docker-compose ps:*)",
+      "Bash(psql:*)",
+      "Bash(vite-node:*)",
+      "Bash(pnpm exec vite-node:*)",
+      "Bash(USE_MOCK_QIITA=true pnpm sync:*)"
     ]
   }
 }
