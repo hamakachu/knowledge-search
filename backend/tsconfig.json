@@ -2,11 +2,10 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../sync-worker/src/clients/qiitaClient.ts"],
   "exclude": ["node_modules", "dist"]
 }

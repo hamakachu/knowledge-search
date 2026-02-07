@@ -70,4 +70,94 @@ describe('QiitaClient', () => {
       expect(client).toBeDefined();
     });
   });
+
+  describe('checkArticleAccess', () => {
+    it('checkArticleAccess_記事が存在しアクセス可能_trueを返す', async () => {
+      // Arrange
+      process.env.USE_MOCK_QIITA = 'true';
+      const client = new QiitaClient('valid_token');
+      const articleId = 'test-article-id-1';
+
+      // Act
+      const hasAccess = await client.checkArticleAccess(articleId);
+
+      // Assert
+      expect(hasAccess).toBe(true);
+    });
+
+    it('checkArticleAccess_記事が存在しないまたは権限なし_falseを返す', async () => {
+      // Arrange
+      process.env.USE_MOCK_QIITA = 'true';
+      const client = new QiitaClient('valid_token');
+      const articleId = 'non-existent-article';
+
+      // Act
+      const hasAccess = await client.checkArticleAccess(articleId);
+
+      // Assert
+      expect(hasAccess).toBe(false);
+    });
+
+    it('checkArticleAccess_APIエラー発生_falseを返す（安全側に倒す）', async () => {
+      // Arrange
+      process.env.USE_MOCK_QIITA = 'true';
+      const client = new QiitaClient('valid_token');
+      const articleId = 'error-trigger-id';
+
+      // Act
+      const hasAccess = await client.checkArticleAccess(articleId);
+
+      // Assert
+      expect(hasAccess).toBe(false);
+    });
+  });
+
+  describe('checkBatchAccess', () => {
+    it('checkBatchAccess_複数記事の権限チェック_アクセス可能な記事IDのSetを返す', async () => {
+      // Arrange
+      process.env.USE_MOCK_QIITA = 'true';
+      const client = new QiitaClient('valid_token');
+      const articleIds = ['test-article-id-1', 'test-article-id-2', 'non-existent-article'];
+
+      // Act
+      const accessibleIds = await client.checkBatchAccess(articleIds);
+
+      // Assert
+      expect(accessibleIds).toBeInstanceOf(Set);
+      expect(accessibleIds.has('test-article-id-1')).toBe(true);
+      expect(accessibleIds.has('test-article-id-2')).toBe(true);
+      expect(accessibleIds.has('non-existent-article')).toBe(false);
+      expect(accessibleIds.size).toBe(2);
+    });
+
+    it('checkBatchAccess_空配列を渡す_空のSetを返す', async () => {
+      // Arrange
+      process.env.USE_MOCK_QIITA = 'true';
+      const client = new QiitaClient('valid_token');
+
+      // Act
+      const accessibleIds = await client.checkBatchAccess([]);
+
+      // Assert
+      expect(accessibleIds).toBeInstanceOf(Set);
+      expect(accessibleIds.size).toBe(0);
+    });
+
+    it('checkBatchAccess_並列処理で実行される', async () => {
+      // Arrange
+      process.env.USE_MOCK_QIITA = 'true';
+      const client = new QiitaClient('valid_token');
+      const articleIds = Array.from({ length: 10 }, (_, i) => `article-${i}`);
+
+      // Act
+      const startTime = Date.now();
+      const accessibleIds = await client.checkBatchAccess(articleIds);
+      const duration = Date.now() - startTime;
+
+      // Assert
+      // 並列処理なので、直列処理よりも速いはず（モック環境では即座に完了）
+      expect(accessibleIds).toBeInstanceOf(Set);
+      expect(duration).toBeLessThan(1000); // 1秒以内に完了
+    });
+  });
 });

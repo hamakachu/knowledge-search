@@ -160,34 +160,12 @@ TDD実装 → レビュー依頼 → レビュー実行 → 修正 or ユーザ�
 
 現在、以下のスキルが利用可能です:
 
-#### quality-check
-- **目的**: 品質チェック（typecheck + lint + test）を一括実行
-- **使用方法**:
-  ```
-  /quality-check
-  /quality-check target=backend
-  /quality-check coverage=true build=true
-  ```
-- **詳細**: [skills/quality-check/SKILL.md](skills/quality-check/SKILL.md)
-- **対応プロジェクト**: backend、frontend、sync-worker、all
+- **quality-check**: 品質チェック（typecheck + lint + test）を一括実行
+- **plan-and-commit**: 実装前の詳細な実装計画立案とコミット
+- **feature-implementation-cycle**: 機能実装サイクルの標準化（実装 → レビュー → 承認 → 履歴記録）
+- **skill-creator**: 繰り返しパターンからスキル定義を自動生成
 
-#### plan-and-commit
-- **目的**: 実装前に詳細な実装計画を立て、プランファイルを `.claude/docs/` 配下にコミット
-- **使用方法**:
-  ```
-  /plan-and-commit task_description="実装するタスクの概要"
-  /plan-and-commit task_description="DB upsert処理の実装" plan_filename="db-upsert-plan.md"
-  ```
-- **詳細**: [skills/plan-and-commit/SKILL.md](skills/plan-and-commit/SKILL.md)
-- **実行フロー**: Plan Mode起動 → Explore Agent → Plan Agent → Plan File作成 → ユーザーレビュー → コピー & コミット
-
-#### skill-creator
-- **目的**: 繰り返しパターンからスキル定義を自動生成
-- **使用方法**:
-  1. dashboard.mdの「メインエージェント → サブエージェント」セクションにタスク指示を記載
-  2. Task toolで skill_creator エージェントを起動
-  3. dashboard.mdで結果を確認
-- **詳細**: [skills/skill_creator/SKILL.md](skills/skill_creator/SKILL.md)
+詳細は各スキルのSKILL.mdファイルを参照。
 
 **スキル追加の手順**:
 1. 繰り返しパターンを3回以上確認
@@ -225,23 +203,7 @@ TDD実装 → レビュー依頼 → レビュー実行 → 修正 or ユーザ�
 
 ---
 
-### 10.2 実装完了した機能
-
-#### Qiita Team sync-worker DB upsert処理（優先度1 - MVP）（✅ 完了 - 2026-02-05）
-- documentRepositoryパターンの実装（upsertDocument()メソッド）
-- ON CONFLICT句による安全なupsert処理
-- TDDによる包括的なテストカバレッジ（7件すべて成功）
-- モックデータのDB投入と冪等性確認完了
-- 将来の改善課題: 優先度2でトランザクション実装によるバッチ処理化
-
-#### ドキュメント統計情報表示機能（✅ 完了 - 2026-02-04）
-- バックエンド: `GET /api/stats` エンドポイント
-- フロントエンド: `DocumentStats` コンポーネント
-- PostgreSQLからの実データ取得、空データ対応済み
-
----
-
-### 10.3 今後の実装候補
+### 10.2 今後の実装候補
 
 1. **Sync Worker cron設定**: 日次自動同期
 2. **検索機能の統合テスト**: E2E動作確認
