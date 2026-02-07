@@ -1,3 +1,9 @@
+---
+name: feature-implementation-cycle
+description: 機能実装の標準化されたサイクルを自動化する（実装→レビュー→承認→履歴記録）
+disable-model-invocation: false
+---
+
 # feature-implementation-cycle
 
 ## 概要

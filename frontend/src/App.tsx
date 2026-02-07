@@ -1,36 +1,27 @@
-import { SearchBox } from './components/SearchBox';
-import { SearchResults } from './components/SearchResults';
-import { DocumentStats } from './components/DocumentStats';
-import { useSearch } from './hooks/useSearch';
+import { useAuth } from './hooks/useAuth';
+import { LoginPage } from './pages/LoginPage';
+import { SearchPage } from './pages/SearchPage';
 
+/**
+ * アプリケーションのルートコンポーネント
+ * 認証状態に応じてLoginPageまたはSearchPageを表示する
+ */
 function App() {
-  const { query, results, isLoading, error, handleSearch } = useSearch();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">
-          Groovy Knowledge Search
-        </h1>
-
-        <div className="mb-6">
-          <DocumentStats />
+  // 認証チェック中はローディング表示
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">読み込み中...</p>
         </div>
-
-        <SearchBox onSearch={handleSearch} isLoading={isLoading} />
-
-        {error && (
-          <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-
-        {query && (
-          <SearchResults results={results} query={query} isLoading={isLoading} />
-        )}
       </div>
-    </div>
-  );
+    );
+  }
+
+  // 認証状態に応じて表示を切り替え
+  return isAuthenticated ? <SearchPage /> : <LoginPage />;
 }
 
 export default App;

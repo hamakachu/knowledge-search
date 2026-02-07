@@ -1,3 +1,9 @@
+---
+name: plan-and-commit
+description: 実装前に詳細な実装計画を立案し、プランファイルをコミット
+disable-model-invocation: false
+---
+
 # plan-and-commit
 
 ## 概要

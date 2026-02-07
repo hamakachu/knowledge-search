@@ -1,3 +1,9 @@
+---
+name: skill-creator
+description: 繰り返しタスクパターンを分析し、再利用可能なスキルを生成
+disable-model-invocation: false
+---
+
 # skill-creator
 
 ## 概要

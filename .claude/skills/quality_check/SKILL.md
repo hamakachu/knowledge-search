@@ -1,3 +1,9 @@
+---
+name: quality-check
+description: TypeScript品質チェック（型チェック・Lint・テスト）を一括実行
+disable-model-invocation: false
+---
+
 # quality-check
 
 ## 概要
