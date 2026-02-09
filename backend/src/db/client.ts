@@ -1,4 +1,8 @@
+import dotenv from 'dotenv';
 import pg from 'pg';
+
+// 環境変数を最初にロード
+dotenv.config();
 
 const { Pool } = pg;
 

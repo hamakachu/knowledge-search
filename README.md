@@ -221,6 +221,34 @@ pnpm --filter frontend dev
 
 ブラウザで http://localhost:5173 にアクセス
 
+### 8. テストユーザーでログイン
+
+開発環境では、以下のテストユーザーを使用してログインできます。
+
+#### テストユーザー情報
+
+| ユーザー名 | メールアドレス | 用途 |
+|-----------|---------------|------|
+| `test_user` | `test@example.com` | 基本的な動作確認用 |
+| `demo_user` | `demo@example.com` | デモ・プレゼンテーション用 |
+
+#### テストユーザー作成方法
+
+テストユーザーは以下のスクリプトで作成できます:
+
+```bash
+# テストユーザー作成SQLを生成
+pnpm tsx database/create-test-user.ts > database/test-users.sql
+
+# データベースに登録
+docker exec -i groovy-knowledge-search-db psql -U postgres -d groovy_knowledge_search < database/test-users.sql
+```
+
+**注意事項:**
+- テストユーザーのQiita Tokenはダミー値です（実際のQiita Team APIは呼び出せません）
+- 本番環境では使用しないでください
+- テストユーザーはusernameまたはemailでログインできます
+
 ## 開発ステータス
 
 ### Phase 1: 基盤構築 ⏳
