@@ -8,6 +8,7 @@
 export interface User {
   id: number;
   username: string;
+  email: string;
 }
 
 /**
@@ -15,7 +16,7 @@ export interface User {
  */
 export interface LoginCredentials {
   username: string;
-  password: string;
+  email: string;
   qiitaToken: string;
 }
 

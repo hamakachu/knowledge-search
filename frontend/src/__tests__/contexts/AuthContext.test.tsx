@@ -50,10 +50,10 @@ describe('AuthContext', () => {
 
   describe('checkAuth', () => {
     it('認証済みユーザー情報を取得できる', async () => {
-      const mockUser = { id: 1, username: 'testuser' };
+      const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ user: mockUser }),
+        json: async () => mockUser,
       });
 
       const { result } = renderHook(() => useAuthContext(), {
@@ -104,10 +104,10 @@ describe('AuthContext', () => {
 
   describe('login', () => {
     it('ログイン成功時にユーザー情報を設定する', async () => {
-      const mockUser = { id: 1, username: 'testuser' };
+      const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
       const credentials: LoginCredentials = {
         username: 'testuser',
-        password: 'password123',
+        email: 'test@example.com',
         qiitaToken: 'qiita_token_123',
       };
 
@@ -128,7 +128,7 @@ describe('AuthContext', () => {
       // ログイン実行
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ user: mockUser }),
+        json: async () => mockUser,
       });
 
       await act(async () => {
@@ -149,7 +149,7 @@ describe('AuthContext', () => {
     it('ログイン失敗時にエラーをスローする', async () => {
       const credentials: LoginCredentials = {
         username: 'testuser',
-        password: 'wrong_password',
+        email: 'wrong@example.com',
         qiitaToken: 'qiita_token_123',
       };
 
@@ -187,7 +187,7 @@ describe('AuthContext', () => {
     it('ネットワークエラー時にエラーをスローする', async () => {
       const credentials: LoginCredentials = {
         username: 'testuser',
-        password: 'password123',
+        email: 'test@example.com',
         qiitaToken: 'qiita_token_123',
       };
 
@@ -218,12 +218,12 @@ describe('AuthContext', () => {
 
   describe('logout', () => {
     it('ログアウト成功時にユーザー情報をクリアする', async () => {
-      const mockUser = { id: 1, username: 'testuser' };
+      const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
 
       // 初回: checkAuth（認証済み）
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ user: mockUser }),
+        json: async () => mockUser,
       });
 
       const { result } = renderHook(() => useAuthContext(), {
@@ -254,12 +254,12 @@ describe('AuthContext', () => {
     });
 
     it('ログアウト失敗時でもユーザー情報をクリアする', async () => {
-      const mockUser = { id: 1, username: 'testuser' };
+      const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
 
       // 初回: checkAuth（認証済み）
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ user: mockUser }),
+        json: async () => mockUser,
       });
 
       const { result } = renderHook(() => useAuthContext(), {
@@ -301,10 +301,10 @@ describe('AuthContext', () => {
 
   describe('統合テスト: 完全な認証フロー', () => {
     it('未認証 → ログイン → ログアウトの一連の流れが正常に動作する', async () => {
-      const mockUser = { id: 1, username: 'testuser' };
+      const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
       const credentials: LoginCredentials = {
         username: 'testuser',
-        password: 'password123',
+        email: 'test@example.com',
         qiitaToken: 'qiita_token_123',
       };
 
@@ -327,7 +327,7 @@ describe('AuthContext', () => {
       // 2. ログイン
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ user: mockUser }),
+        json: async () => mockUser,
       });
 
       await act(async () => {

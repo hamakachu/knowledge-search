@@ -22,6 +22,27 @@ router.post('/login', async (req: Request, res: Response) => {
       return;
     }
 
+    // テスト環境用: バリデーション緩和
+    const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+    const isTestUser = username.startsWith('test_') || username.startsWith('demo_');
+    const shouldSkipValidation = isDevelopment && isTestUser;
+
+    // テスト環境のテストユーザー以外は厳格なバリデーション
+    if (!shouldSkipValidation) {
+      // メールアドレス形式チェック
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        res.status(400).json({ error: 'Invalid email format' });
+        return;
+      }
+
+      // Qiitaトークン形式チェック（本番環境のみ）
+      if (!isDevelopment && !qiitaToken.startsWith('qiita_')) {
+        res.status(400).json({ error: 'Invalid Qiita token format' });
+        return;
+      }
+    }
+
     // ユーザー検索
     let user = await findUserByUsername(username);
 

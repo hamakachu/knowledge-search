@@ -57,11 +57,47 @@ CREATE INDEX IF NOT EXISTS idx_documents_updated_at
   ON documents (updated_at DESC);
 
 -- ============================================
+-- テーブル: users
+-- ============================================
+-- ユーザー情報とQiita Teamトークンを保存
+--
+CREATE TABLE IF NOT EXISTS users (
+  -- 主キー
+  id SERIAL PRIMARY KEY,
+
+  -- ユーザー情報
+  username VARCHAR(255) NOT NULL UNIQUE,
+  email VARCHAR(255) NOT NULL UNIQUE,
+
+  -- 暗号化されたQiita Teamトークン
+  encrypted_qiita_token TEXT NOT NULL,
+
+  -- タイムスタンプ
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================
+-- テーブル: session
+-- ============================================
+-- express-session用のセッションストア
+--
+CREATE TABLE IF NOT EXISTS session (
+  sid VARCHAR NOT NULL PRIMARY KEY,
+  sess JSON NOT NULL,
+  expire TIMESTAMP(6) NOT NULL
+);
+
+-- セッション有効期限でのクリーンアップ用インデックス
+CREATE INDEX IF NOT EXISTS idx_session_expire
+  ON session (expire);
+
+-- ============================================
 -- 完了メッセージ
 -- ============================================
 DO $$
 BEGIN
   RAISE NOTICE 'Schema created successfully';
-  RAISE NOTICE 'Tables: documents';
-  RAISE NOTICE 'Indexes: title_trgm, body_trgm, source, updated_at';
+  RAISE NOTICE 'Tables: documents, users, session';
+  RAISE NOTICE 'Indexes: title_trgm, body_trgm, source, updated_at, session_expire';
 END $$;

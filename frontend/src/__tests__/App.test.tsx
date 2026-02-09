@@ -52,11 +52,9 @@ describe('App - ルーティング統合', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          user: {
-            id: '1',
-            username: 'testuser',
-            email: 'test@example.com',
-          },
+          id: 1,
+          username: 'testuser',
+          email: 'test@example.com',
         }),
       });
 

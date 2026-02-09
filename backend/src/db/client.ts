@@ -2,12 +2,30 @@ import pg from 'pg';
 
 const { Pool } = pg;
 
-export const dbClient = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+// DATABASE_URLをパースして個別のオプションに変換
+function parseDatabaseUrl(url: string | undefined): pg.PoolConfig {
+  if (!url) {
+    throw new Error('DATABASE_URL is not set');
+  }
+
+  try {
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname,
+      port: parseInt(parsed.port || '5432', 10),
+      database: parsed.pathname.slice(1), // Remove leading slash
+      user: parsed.username,
+      password: parsed.password,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    };
+  } catch (error) {
+    throw new Error(`Failed to parse DATABASE_URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+export const dbClient = new Pool(parseDatabaseUrl(process.env.DATABASE_URL));
 
 /**
  * データベースクエリを実行

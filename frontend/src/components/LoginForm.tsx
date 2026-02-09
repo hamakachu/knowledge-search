@@ -45,7 +45,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
     if (validateForm()) {
       onSubmit({
         username: username.trim(),
-        password: email.trim(),
+        email: email.trim(),
         qiitaToken: qiitaToken.trim(),
       });
     }

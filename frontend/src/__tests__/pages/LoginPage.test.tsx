@@ -45,7 +45,7 @@ describe('LoginPage', () => {
   });
 
   it('フォーム送信でログイン処理が実行される', async () => {
-    const mockUser = { id: 1, username: 'testuser' };
+    const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
 
     render(
       <AuthProvider>
@@ -69,7 +69,7 @@ describe('LoginPage', () => {
     // ログイン成功
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ user: mockUser }),
+      json: async () => mockUser,
     });
 
     fireEvent.click(submitButton);
@@ -84,7 +84,7 @@ describe('LoginPage', () => {
           credentials: 'include',
           body: JSON.stringify({
             username: 'testuser',
-            password: 'test@example.com',
+            email: 'test@example.com',
             qiitaToken: 'qiita_token_123',
           }),
         })

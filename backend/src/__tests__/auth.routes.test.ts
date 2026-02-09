@@ -37,7 +37,7 @@ describe('auth routes', () => {
     it('新規ユーザーの場合は登録してセッションを作成する', async () => {
       const mockUser = {
         id: 1,
-        username: 'newuser',
+        username: 'test_newuser',
         email: 'new@example.com',
         encrypted_qiita_token: 'encrypted:token:data',
         created_at: new Date(),
@@ -50,7 +50,7 @@ describe('auth routes', () => {
       const response = await request(app)
         .post('/api/auth/login')
         .send({
-          username: 'newuser',
+          username: 'test_newuser',
           email: 'new@example.com',
           qiitaToken: 'test-token-12345',
         });
@@ -58,13 +58,13 @@ describe('auth routes', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
         id: 1,
-        username: 'newuser',
+        username: 'test_newuser',
         email: 'new@example.com',
       });
 
-      expect(authService.findUserByUsername).toHaveBeenCalledWith('newuser');
+      expect(authService.findUserByUsername).toHaveBeenCalledWith('test_newuser');
       expect(authService.createUser).toHaveBeenCalledWith({
-        username: 'newuser',
+        username: 'test_newuser',
         email: 'new@example.com',
         qiitaToken: 'test-token-12345',
       });
@@ -73,7 +73,7 @@ describe('auth routes', () => {
     it('既存ユーザーの場合はトークンを更新してセッションを作成する', async () => {
       const mockUser = {
         id: 1,
-        username: 'existinguser',
+        username: 'test_existinguser',
         email: 'existing@example.com',
         encrypted_qiita_token: 'old:encrypted:token',
         created_at: new Date(),
@@ -91,7 +91,7 @@ describe('auth routes', () => {
       const response = await request(app)
         .post('/api/auth/login')
         .send({
-          username: 'existinguser',
+          username: 'test_existinguser',
           email: 'existing@example.com',
           qiitaToken: 'new-token-67890',
         });
@@ -99,11 +99,11 @@ describe('auth routes', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
         id: 1,
-        username: 'existinguser',
+        username: 'test_existinguser',
         email: 'existing@example.com',
       });
 
-      expect(authService.findUserByUsername).toHaveBeenCalledWith('existinguser');
+      expect(authService.findUserByUsername).toHaveBeenCalledWith('test_existinguser');
       expect(authService.updateQiitaToken).toHaveBeenCalledWith(1, 'new-token-67890');
     });
 

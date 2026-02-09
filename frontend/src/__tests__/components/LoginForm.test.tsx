@@ -150,7 +150,7 @@ describe('LoginForm', () => {
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         username: 'testuser',
-        password: 'test@example.com',
+        email: 'test@example.com',
         qiitaToken: 'qiita_token_123',
       } as LoginCredentials);
     });
