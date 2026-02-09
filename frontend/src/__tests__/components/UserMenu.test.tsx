@@ -7,6 +7,7 @@ import type { User } from '../../types/auth';
 const mockUser: User = {
   id: 1,
   username: 'testuser',
+  email: 'test@example.com',
 };
 
 // useAuthのモック

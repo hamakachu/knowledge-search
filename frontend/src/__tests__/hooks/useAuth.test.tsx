@@ -18,11 +18,11 @@ describe('useAuth', () => {
   });
 
   it('AuthProviderから認証状態を取得できる', async () => {
-    const mockUser = { id: 1, username: 'testuser' };
+    const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
 
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ user: mockUser }),
+      json: async () => mockUser,
     });
 
     const { result } = renderHook(() => useAuth(), {
@@ -38,10 +38,10 @@ describe('useAuth', () => {
   });
 
   it('login関数を呼び出せる', async () => {
-    const mockUser = { id: 1, username: 'testuser' };
+    const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
     const credentials: LoginCredentials = {
       username: 'testuser',
-      password: 'password123',
+      email: 'test@example.com',
       qiitaToken: 'qiita_token_123',
     };
 
@@ -62,7 +62,7 @@ describe('useAuth', () => {
     // ログイン実行
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ user: mockUser }),
+      json: async () => mockUser,
     });
 
     await act(async () => {
@@ -74,12 +74,12 @@ describe('useAuth', () => {
   });
 
   it('logout関数を呼び出せる', async () => {
-    const mockUser = { id: 1, username: 'testuser' };
+    const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
 
     // 初回: checkAuth（認証済み）
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ user: mockUser }),
+      json: async () => mockUser,
     });
 
     const { result } = renderHook(() => useAuth(), {
@@ -105,7 +105,7 @@ describe('useAuth', () => {
   });
 
   it('checkAuth関数を呼び出せる', async () => {
-    const mockUser = { id: 1, username: 'testuser' };
+    const mockUser = { id: 1, username: 'testuser', email: 'test@example.com' };
 
     // 初回: checkAuth（未認証）
     mockFetch.mockResolvedValueOnce({
@@ -126,7 +126,7 @@ describe('useAuth', () => {
     // 手動でcheckAuth実行
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ user: mockUser }),
+      json: async () => mockUser,
     });
 
     await act(async () => {

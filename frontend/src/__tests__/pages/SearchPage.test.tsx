@@ -16,6 +16,7 @@ describe('SearchPage', () => {
       user: {
         id: 1,
         username: 'testuser',
+        email: 'test@example.com',
       },
       isAuthenticated: true,
       isLoading: false,
