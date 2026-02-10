@@ -180,6 +180,10 @@
 | ドキュメント化しても理解が難しい複雑さか？ | ✅ | ❌ |
 | 他のプロジェクトでも再利用できそうか？ | ✅ | ❌ |
 
+**自動チェック機能**:
+- `feature-implementation-cycle`スキル使用時、Phase完了後に自動的にこのチェックリストが表示されます
+- `.claude/settings.json`のhookにより、「Phase実装完了」などのキーワード検出時にもチェックリストを表示
+
 **1つでもYesがある場合:**
 1. ユーザーに報告：「このフローはスキル化の候補です」
 2. スキル化の提案：具体的な作業内容を説明
@@ -253,29 +257,55 @@
 
 ### 10.1 次のタスク（優先度: 最高）
 
-**Phase 5: 既存API呼び出し修正（優先度: 最高）**
+**Phase 2: 同期時エンベディング生成（優先度: 最高）**
 
-**目的**: 既存のAPI呼び出しに認証情報を含めるように修正、401エラーハンドリング実装
+**目的**: Qiita記事同期時にGemini APIでエンベディングを生成し、documentsテーブルのembeddingカラムに保存する
 
 **実装内容**:
-1. `frontend/src/api/` 配下のすべてのfetch呼び出しに `credentials: 'include'` を追加
-2. 401エラーの適切なハンドリング（ログアウト処理またはログインページへリダイレクト）
-3. エラー時のユーザーフィードバック実装
+1. `sync-worker/src/sync-qiita.ts` を更新
+   - 記事同期時に `generateEmbedding()` を呼び出す
+   - 生成したエンベディングを `upsertDocument()` に渡す
+2. `sync-worker/src/db/documentRepository.ts` を更新
+   - `upsertDocument()` に `embedding?: number[]` パラメータを追加
+   - embeddingカラムへの保存ロジック実装
+3. TDDでテスト実装
 
-**技術要件**:
-- すべてのAPI呼び出しでセッションCookieを送信
-- 401エラー時の自動ログアウト
-- ネットワークエラーの適切なハンドリング
+**成果物**:
+- `sync-worker/src/sync-qiita.ts`（更新）
+- `sync-worker/src/db/documentRepository.ts`（更新）
+- 対応テストファイルの更新
+
+**テスト項目**:
+- ✅ 記事同期時にエンベディングが生成される（モック）
+- ✅ 生成されたエンベディングがDBに保存される
+- ✅ エンベディング生成失敗時も記事同期は継続する（エラー耐性）
 
 **実装時の注意**:
 - TDD徹底（Red → Green → Refactor）
-- 既存のテストを壊さないこと
-- frontend_developer サブエージェントを活用
+- backend_developer サブエージェントを活用
 - 実装完了後は typescript_reviewer によるレビューを実施
+- USE_MOCK_GEMINI=true でのテスト可能性を確保
 
 ---
 
 ### 10.2 実装完了した機能
+
+#### Phase 1: Gemini APIクライアント実装（✅ 完了 - 2026-02-10）
+- Gemini API クライアント実装完了（generateEmbedding関数、768次元ベクトル生成）
+- USE_MOCK_GEMINI=trueによるモック切り替え機能
+- レート制限対策（4秒/リクエスト）、リトライロジック（指数バックオフ）実装
+- テスト22件すべて成功、geminiClient.ts 100%カバレッジ達成
+- コード品質評価：保守性・安全性・パフォーマンスすべて優秀
+
+#### Phase 0: pgvector基盤構築（✅ 完了 - 2026-02-09）
+- PostgreSQLにpgvector拡張を導入（pgvector/pgvector:pg16）
+- embeddingカラム追加（vector(768)型）
+- IVFFlatインデックス作成（高速な近似最近傍探索、コサイン類似度演算子）
+- pgvector動作確認テスト6件実装
+- TDDサイクル（Red → Green → Refactor）の実践成功
+- テスト58件すべて成功、テストカバレッジ81.11%達成（目標80%以上）
+- コード品質評価：保守性・安全性・パフォーマンスすべて優秀
+- PostgreSQL 15→16へのメジャーバージョンアップ完了
 
 #### Phase 4: ルーティング統合（✅ 完了 - 2026-02-07）
 - 認証ベースのルーティング実装完了（未認証→LoginPage、認証済み→SearchPage）
@@ -290,10 +320,13 @@
 
 ### 10.3 今後の実装候補
 
-1. **Qiita Team sync-worker トランザクション実装**: 一括upsert処理
-3. **Sync Worker cron設定**: 日次自動同期
-4. **検索機能の統合テスト**: E2E動作確認
-5. **検索拡張**: フィルタリング、ソート、ページネーション
+1. **Phase 3: ハイブリッド検索ロジック実装**: セマンティック検索 + キーワード検索
+3. **Phase 4: 検索API更新**: ハイブリッド検索APIエンドポイント追加
+4. **Phase 5: 既存API呼び出し修正**: 認証情報含める、401エラーハンドリング
+5. **Qiita Team sync-worker トランザクション実装**: 一括upsert処理
+6. **Sync Worker cron設定**: 日次自動同期
+7. **検索機能の統合テスト**: E2E動作確認
+8. **検索拡張**: フィルタリング、ソート、ページネーション
 
 ---
 
