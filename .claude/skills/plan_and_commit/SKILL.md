@@ -1,10 +1,10 @@
 ---
-name: plan-and-commit
+name: plan_and_commit
 description: 実装前に詳細な実装計画を立案し、プランファイルをコミット
 disable-model-invocation: false
 ---
 
-# plan-and-commit
+# plan_and_commit
 
 ## 概要
 実装前に詳細な実装計画を立て、プランファイルを `.claude/docs/` 配下にコミットするワークフローを標準化するスキルです。Plan Modeを活用して、Exploreエージェントによるコードベース調査とPlanエージェントによる設計を実施し、レビュー可能な実装計画書を作成します。
@@ -23,7 +23,7 @@ disable-model-invocation: false
 ### 基本的な使い方
 ```
 メインエージェントから直接実行:
-"/plan-and-commit"
+"/plan_and_commit"
 または
 "実装計画を立ててください"
 ```
@@ -33,14 +33,14 @@ disable-model-invocation: false
 | パラメータ名 | 必須/任意 | デフォルト値 | 説明 |
 |------------|---------|-------------|------|
 | task_description | 必須 | - | 実装するタスクの概要（例: "DB upsert処理の実装"） |
-| plan_filename | 任意 | task名から自動生成 | 計画書のファイル名（例: "db-upsert-implementation-plan.md"） |
+| plan_filename | 任意 | task名から自動生成 | 計画書のファイル名（例: "db_upsert_implementation_plan.md"） |
 | skip_explore | 任意 | false | Exploreフェーズをスキップ（true / false） |
 
 **パラメータ指定例**:
 ```
-/plan-and-commit task_description="DB upsert処理の実装"
-/plan-and-commit task_description="新機能: ユーザー認証" plan_filename="user-auth-plan.md"
-/plan-and-commit task_description="簡易タスク" skip_explore=true
+/plan_and_commit task_description="DB upsert処理の実装"
+/plan_and_commit task_description="新機能: ユーザー認証" plan_filename="user_auth_plan.md"
+/plan_and_commit task_description="簡易タスク" skip_explore=true
 ```
 
 ---
@@ -83,8 +83,8 @@ disable-model-invocation: false
    - 期待される結果: ユーザーから「実装計画を.claude/docs配下にコミットしてください」などの承認を得る
 
 ### 6. **Plan Fileを.claude/docs配下にコピー**
-   - `~/.claude/plans/[random-name].md` を `.claude/docs/[descriptive-name]-plan.md` にコピー
-   - ファイル名は実装タスクの内容を反映した名前（例: `db-upsert-implementation-plan.md`、`user-auth-implementation-plan.md`）
+   - `~/.claude/plans/[random-name].md` を `.claude/docs/[descriptive_name]_plan.md` にコピー
+   - ファイル名は実装タスクの内容を反映した名前（例: `db_upsert_implementation_plan.md`、`user_auth_implementation_plan.md`）
    - 期待される結果: 実装計画書がプロジェクトのドキュメントディレクトリに配置される
 
 ### 7. **Git コミット**
@@ -153,7 +153,7 @@ disable-model-invocation: false
 
 ### 例1: DB upsert処理の実装計画
 ```
-/plan-and-commit task_description="Qiita Team sync-workerのDB upsert処理実装"
+/plan_and_commit task_description="Qiita Team sync-workerのDB upsert処理実装"
 ```
 
 **実行されるフロー**:
@@ -169,7 +169,7 @@ disable-model-invocation: false
    - エラーハンドリング（4種類）の設計
 4. Plan File作成: `~/.claude/plans/qiita-sync-db-upsert.md`
 5. ユーザーレビュー待機
-6. コピー: `.claude/docs/db-upsert-implementation-plan.md`
+6. コピー: `.claude/docs/db_upsert_implementation_plan.md`
 7. Gitコミット: `docs: Add implementation plan for Qiita Team sync-worker DB upsert`
 
 **期待される出力**:
@@ -181,13 +181,13 @@ disable-model-invocation: false
 ⏸️  ユーザーレビュー待機中...
 
 （ユーザー承認後）
-✅ 実装計画をコピー: .claude/docs/db-upsert-implementation-plan.md
+✅ 実装計画をコピー: .claude/docs/db_upsert_implementation_plan.md
 ✅ Gitコミット完了
 ```
 
 ### 例2: 新機能の実装計画（ユーザー認証）
 ```
-/plan-and-commit task_description="ユーザー認証機能の追加" plan_filename="user-auth-plan.md"
+/plan_and_commit task_description="ユーザー認証機能の追加" plan_filename="user_auth_plan.md"
 ```
 
 **実行されるフロー**:
@@ -202,12 +202,12 @@ disable-model-invocation: false
    - TDD実装フロー
 4. Plan File作成
 5. ユーザーレビュー
-6. `.claude/docs/user-auth-plan.md` にコピー
+6. `.claude/docs/user_auth_plan.md` にコピー
 7. Gitコミット
 
 ### 例3: 簡易タスクの実装計画（Exploreスキップ）
 ```
-/plan-and-commit task_description="簡易なバグ修正" skip_explore=true
+/plan_and_commit task_description="簡易なバグ修正" skip_explore=true
 ```
 
 **実行されるフロー**:
@@ -265,12 +265,12 @@ disable-model-invocation: false
 **形式**: `[task-name]-plan.md`
 
 **例**:
-- `db-upsert-implementation-plan.md`（DB upsert処理の実装計画）
-- `user-auth-implementation-plan.md`（ユーザー認証機能の実装計画）
-- `search-filter-implementation-plan.md`（検索フィルタ機能の実装計画）
+- `db_upsert_implementation_plan.md`（DB upsert処理の実装計画）
+- `user_auth_implementation_plan.md`（ユーザー認証機能の実装計画）
+- `search_filter_implementation_plan.md`（検索フィルタ機能の実装計画）
 
 **命名のポイント**:
-- kebab-case を使用
+- snake_case を使用
 - タスクの内容を端的に表現
 - `-plan.md` で終わる
 
@@ -289,7 +289,7 @@ disable-model-invocation: false
 ```markdown
 **結果ステータス**: 完了
 
-**担当サブエージェント**: plan-and-commit
+**担当サブエージェント**: plan_and_commit
 
 **実行結果**:
 ✅ Plan Mode起動完了
@@ -300,7 +300,7 @@ disable-model-invocation: false
 ✅ Gitコミット完了
 
 **作成したファイル**:
-- .claude/docs/[descriptive-name]-plan.md
+- .claude/docs/[descriptive_name]_plan.md
 
 **問題点**:
 なし
@@ -312,8 +312,8 @@ disable-model-invocation: false
 ---
 
 ## 関連スキル
-- [quality-check](../quality_check/SKILL.md): 実装完了後の品質チェック
-- [skill-creator](../skill_creator/SKILL.md): スキル定義の生成・管理
+- [quality_check](../quality_check/SKILL.md): 実装完了後の品質チェック
+- [skill_creator](../skill_creator/SKILL.md): スキル定義の生成・管理
 
 ---
 
@@ -357,7 +357,7 @@ disable-model-invocation: false
                       ▼
 ┌─────────────────────────────────────────────────┐
 │ 6. コピー & コミット                             │
-│    .claude/docs/[descriptive-name]-plan.md      │
+│    .claude/docs/[descriptive_name]_plan.md      │
 └─────────────────────────────────────────────────┘
 ```
 

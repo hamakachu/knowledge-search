@@ -1,8 +1,8 @@
-# plan-and-commit スキル
+# plan_and_commit スキル
 
 ## 概要
 
-`plan-and-commit` は、実装前に詳細な実装計画を立て、プランファイルを `.claude/docs/` 配下にコミットするワークフローを標準化するスキルです。
+`plan_and_commit` は、実装前に詳細な実装計画を立て、プランファイルを `.claude/docs/` 配下にコミットするワークフローを標準化するスキルです。
 
 ## なぜこのスキルが必要か
 
@@ -23,12 +23,12 @@
 ### 基本的な使い方
 
 ```
-/plan-and-commit task_description="実装するタスクの概要"
+/plan_and_commit task_description="実装するタスクの概要"
 ```
 
 例:
 ```
-/plan-and-commit task_description="Qiita Team sync-workerのDB upsert処理実装"
+/plan_and_commit task_description="Qiita Team sync-workerのDB upsert処理実装"
 ```
 
 ### 実行フロー
@@ -45,7 +45,7 @@
 ### 例1: DB upsert処理の実装計画
 
 ```
-/plan-and-commit task_description="Qiita Team sync-workerのDB upsert処理実装"
+/plan_and_commit task_description="Qiita Team sync-workerのDB upsert処理実装"
 ```
 
 **作成される実装計画書の内容**:
@@ -61,13 +61,13 @@
 ### 例2: カスタムファイル名を指定
 
 ```
-/plan-and-commit task_description="ユーザー認証機能の追加" plan_filename="user-auth-plan.md"
+/plan_and_commit task_description="ユーザー認証機能の追加" plan_filename="user-auth-plan.md"
 ```
 
 ### 例3: Exploreフェーズをスキップ（簡易タスク）
 
 ```
-/plan-and-commit task_description="簡易なバグ修正" skip_explore=true
+/plan_and_commit task_description="簡易なバグ修正" skip_explore=true
 ```
 
 ## 実装計画書のテンプレート
@@ -137,7 +137,7 @@
                       ▼
 ┌─────────────────────────────────────────────────┐
 │ 6. コピー & コミット                             │
-│    .claude/docs/[descriptive-name]-plan.md      │
+│    .claude/docs/[descriptive_name]_plan.md      │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -152,8 +152,8 @@
 
 ## 関連スキル
 
-- [quality-check](../quality_check/SKILL.md): 実装完了後の品質チェック
-- [skill-creator](../skill_creator/SKILL.md): スキル定義の生成・管理
+- [quality_check](../quality_check/SKILL.md): 実装完了後の品質チェック
+- [skill_creator](../skill_creator/SKILL.md): スキル定義の生成・管理
 
 ## 詳細ドキュメント
 

@@ -1,10 +1,10 @@
 ---
-name: quality-check
+name: quality_check
 description: TypeScript品質チェック（型チェック・Lint・テスト）を一括実行
 disable-model-invocation: false
 ---
 
-# quality-check
+# quality_check
 
 ## 概要
 TypeScriptプロジェクトの品質チェック（型チェック、Lint、テスト）を一括実行するスキルです。バックエンドとフロントエンドの両方に対応し、実装完了後やコード修正後の動作確認を効率化します。
@@ -23,7 +23,7 @@ TypeScriptプロジェクトの品質チェック（型チェック、Lint、テ
 ### 基本的な使い方
 ```
 メインエージェントから直接実行:
-"/quality-check"
+"/quality_check"
 または
 "品質チェックを実行してください"
 ```
@@ -38,9 +38,9 @@ TypeScriptプロジェクトの品質チェック（型チェック、Lint、テ
 
 **パラメータ指定例**:
 ```
-/quality-check target=backend
-/quality-check target=frontend coverage=true
-/quality-check target=all build=true
+/quality_check target=backend
+/quality_check target=frontend coverage=true
+/quality_check target=all build=true
 ```
 
 ---
@@ -84,7 +84,7 @@ TypeScriptプロジェクトの品質チェック（型チェック、Lint、テ
 
 ### 例1: すべての品質チェックを実行
 ```
-/quality-check
+/quality_check
 ```
 
 **実行されるコマンド**:
@@ -104,7 +104,7 @@ pnpm test         # backend, frontend, sync-worker すべて
 
 ### 例2: バックエンドのみチェック（カバレッジ付き）
 ```
-/quality-check target=backend coverage=true
+/quality_check target=backend coverage=true
 ```
 
 **実行されるコマンド**:
@@ -125,7 +125,7 @@ pnpm test:coverage
 
 ### 例3: フロントエンドのみチェック（ビルド付き）
 ```
-/quality-check target=frontend build=true
+/quality_check target=frontend build=true
 ```
 
 **実行されるコマンド**:
@@ -147,7 +147,7 @@ pnpm build
 
 ### 例4: すべてのチェックを実行（カバレッジ + ビルド）
 ```
-/quality-check coverage=true build=true
+/quality_check coverage=true build=true
 ```
 
 **実行されるコマンド**:
@@ -210,13 +210,13 @@ pnpm build
 
 **使用例（レビュー時）**:
 ```
-/quality-check coverage=true build=true
+/quality_check coverage=true build=true
 ```
 
 ---
 
 ## 関連スキル
-- [skill-creator](../skill_creator/SKILL.md): スキル定義の生成・管理
+- [skill_creator](../skill_creator/SKILL.md): スキル定義の生成・管理
 
 ---
 

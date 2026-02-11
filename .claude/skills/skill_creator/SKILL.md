@@ -1,10 +1,10 @@
 ---
-name: skill-creator
+name: skill_creator
 description: 繰り返しタスクパターンを分析し、再利用可能なスキルを生成
 disable-model-invocation: false
 ---
 
-# skill-creator
+# skill_creator
 
 ## 概要
 繰り返し発生するタスクパターンを分析し、再利用可能なスキルとして定義・生成します。CLAUDE.mdのスキル化の原則に従い、必要性が明確なものだけをスキル化します。
@@ -88,7 +88,7 @@ dashboard.mdに記載する内容:
 2. 「品質チェックをお願いします」→ typecheck + lint + test を実行
 3. 「テストが通るか確認してください」→ typecheck + lint + test を実行
 
-**スキル名候補**: quality-check
+**スキル名候補**: quality_check
 ```
 
 **期待される出力**:

@@ -1,4 +1,4 @@
-# feature-implementation-cycle
+# feature_implementation_cycle
 
 機能実装の標準化されたサイクルを自動化するスキルです。
 
@@ -25,17 +25,17 @@ Phase 1, 2, 3の実装で以下のフローを繰り返していました:
 
 ### 基本
 ```
-/feature-implementation-cycle phase_name="Phase 1: 基本認証" task_description="ユーザー認証とQiita Teamトークン管理機能の実装"
+/feature_implementation_cycle phase_name="Phase 1: 基本認証" task_description="ユーザー認証とQiita Teamトークン管理機能の実装"
 ```
 
 ### パラメータ付き
 ```
-/feature-implementation-cycle phase_name="Phase 2: 全文検索" task_description="PostgreSQL全文検索実装" target_files="searchService.ts,search.ts"
+/feature_implementation_cycle phase_name="Phase 2: 全文検索" task_description="PostgreSQL全文検索実装" target_files="searchService.ts,search.ts"
 ```
 
 ### フロントエンド実装
 ```
-/feature-implementation-cycle phase_name="Phase 1: ログインUI" task_description="ログインフォームコンポーネントの実装" developer_type=frontend_developer
+/feature_implementation_cycle phase_name="Phase 1: ログインUI" task_description="ログインフォームコンポーネントの実装" developer_type=frontend_developer
 ```
 
 ## 実行フロー（9ステップ）
@@ -153,7 +153,7 @@ dashboard.mdの「履歴」セクションの最上部に新しい履歴を追�
 
 ### Phase 1: 基本認証とトークン管理
 ```
-/feature-implementation-cycle phase_name="Phase 1: 基本認証" task_description="ユーザー認証とQiita Teamトークン管理機能の実装"
+/feature_implementation_cycle phase_name="Phase 1: 基本認証" task_description="ユーザー認証とQiita Teamトークン管理機能の実装"
 ```
 
 **成果**:
@@ -164,7 +164,7 @@ dashboard.mdの「履歴」セクションの最上部に新しい履歴を追�
 
 ### Phase 2: PostgreSQL全文検索
 ```
-/feature-implementation-cycle phase_name="Phase 2: 全文検索" task_description="PostgreSQL全文検索実装（pg_trgm similarity + ILIKE検索）"
+/feature_implementation_cycle phase_name="Phase 2: 全文検索" task_description="PostgreSQL全文検索実装（pg_trgm similarity + ILIKE検索）"
 ```
 
 **成果**:
@@ -175,7 +175,7 @@ dashboard.mdの「履歴」セクションの最上部に新しい履歴を追�
 
 ### Phase 3: API権限チェック
 ```
-/feature-implementation-cycle phase_name="Phase 3: API権限チェック" task_description="Qiita Team APIによる記事アクセス権限チェック機能の実装"
+/feature_implementation_cycle phase_name="Phase 3: API権限チェック" task_description="Qiita Team APIによる記事アクセス権限チェック機能の実装"
 ```
 
 **成果**:
@@ -255,9 +255,9 @@ dashboard.mdの「履歴」セクションの最上部に新しい履歴を追�
 - レビュープロセスが定義されていること（`.claude/rules/review_rule.md`）
 
 ## 関連スキル
-- [quality-check](../quality_check/SKILL.md): 品質チェック（typecheck + lint + test）を一括実行
-- [plan-and-commit](../plan-and-commit/SKILL.md): 実装前の詳細な実装計画立案
-- [skill-creator](../skill_creator/SKILL.md): スキル定義の生成・管理
+- [quality_check](../quality_check/SKILL.md): 品質チェック（typecheck + lint + test）を一括実行
+- [plan_and_commit](../plan_and_commit/SKILL.md): 実装前の詳細な実装計画立案
+- [skill_creator](../skill_creator/SKILL.md): スキル定義の生成・管理
 
 ## 詳細
 

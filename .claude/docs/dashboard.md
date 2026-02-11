@@ -86,6 +86,26 @@
 
 ## 履歴
 
+### [2026-02-11] - Phase 2: 同期時エンベディング生成実装完了
+- **発信**: メインエージェント
+- **内容**: backend_developer → typescript_reviewer の連携でPhase 2（同期時エンベディング生成）を実装
+- **結果**: ✅ ユーザー承認取得、変更反映完了
+- **成果**:
+  - Qiita記事同期時のエンベディング生成実装完了
+  - `DocumentInput` インターフェースに `embedding?: number[]` を追加
+  - `upsertDocument()` のSQL文を更新（`$9::vector` 形式でembeddingカラムへ保存）
+  - エンベディング生成失敗時も記事同期を継続する設計（エラー耐性）
+  - TDDサイクル（Red → Green → Refactor）の実践成功
+  - テスト27件すべて成功、主要ファイルカバレッジ100%達成
+  - コード品質評価：保守性・安全性・パフォーマンスすべて優秀
+- **実装ファイル**:
+  - 更新: 4件（documentRepository.ts, sync-qiita.ts, documentRepository.test.ts, sync-qiita.test.ts）
+- **技術詳細**:
+  - タイトル+本文を結合してエンベディング生成（`title\nbody`）
+  - embeddingなしの場合はNULL保存（後から一括更新可能）
+  - vi.mock でgeminiClientをモック化（外部API呼び出しなしでテスト可能）
+- **次のステップ**: Phase 3（ハイブリッド検索ロジック実装）
+
 ### [2026-02-10] - Phase 1: Gemini APIクライアント実装完了
 - **発信**: メインエージェント
 - **内容**: backend_developer → typescript_reviewer の連携でPhase 1（Gemini APIクライアント実装）を実装
@@ -134,29 +154,6 @@
   - 本番環境でのインデックスチューニング（低優先度）
 - **次のステップ**: Phase 1（Gemini APIクライアント実装）
 
-### [2026-02-09] - 認証バリデーション修正・レビュー完了
-- **発信**: メインエージェント
-- **内容**: 認証バリデーション修正とDATABASE_URL読み込み修正 → typescript_reviewer レビュー → 型エラー修正
-- **結果**: ✅ レビュー完了、重大な問題（型エラー）修正完了
-- **成果**:
-  - 認証バリデーション修正完了（LoginCredentials: password → email）
-  - テスト環境用バリデーション緩和機能追加（test_/demo_ユーザー）
-  - DATABASE_URL読み込みタイミング修正（dotenv.config()を最初に実行）
-  - DATABASE_URLの明示的なパース機能追加
-  - typescript_reviewerによるレビュー実施
-  - レビュー指摘事項（型エラー3件）を修正完了
-- **実装ファイル**:
-  - 修正: 10件（auth.ts, db/client.ts, index.ts, LoginForm.tsx, AuthContext.tsx, types/auth.ts, 全テストファイル）
-- **品質確認結果**:
-  - ✅ テスト: backend 52件、frontend 59件すべて成功
-  - ✅ 型チェック: 成功（エラー0件）
-  - ✅ Lint: 成功
-  - ✅ ビルド: 成功
-  - ✅ テストカバレッジ: backend 81.01%、frontend 84%以上
-- **レビュー指摘事項（推奨）**:
-  - テスト環境用バリデーション緩和の分離（セキュリティ向上）
-  - catch句の型安全性向上（error: unknown）
-- **次のステップ**: テストアカウントでログイン動作確認、Phase 5実装
 
 ---
 

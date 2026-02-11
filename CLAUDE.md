@@ -8,6 +8,8 @@
 ## 共通ルール
 - コメント、テストメソッドのパターン名は日本語で記述する。
 - 例：`testMethod_AをBするとCになる`、`// TODO 今後の実装でXXの機能を追加`
+- ファイル名・ディレクトリ名・スキル名・コマンド名はスネークケース（snake_case）を使用する。ケバブケース（kebab-case）は使用しない。
+- 例：`feature_implementation_cycle`、`plan_and_commit`、`next_phase`（`feature-implementation-cycle` ❌）
 
 ## 1. テスト駆動開発（TDD）の徹底
 
@@ -46,7 +48,7 @@
 
 **注意**:
 - dashboard.mdおよびarchives.mdの内容を、それを記載したエージェントのコンテキストへ保存しないこと。
-- dashboard.mdを通じた連携の詳細は、`feature-implementation-cycle` スキルで自動化される（セクション7参照）
+- dashboard.mdを通じた連携の詳細は、`feature_implementation_cycle` スキルで自動化される（セクション7参照）
 
 ---
 
@@ -87,9 +89,9 @@
 
 ## 7. 開発フロー（必須）
 
-### 原則：feature-implementation-cycleスキルの使用を厳守
+### 原則：feature_implementation_cycleスキルの使用を厳守
 
-**Phase単位の機能実装は、必ず `feature-implementation-cycle` スキルを使用すること。**
+**Phase単位の機能実装は、必ず `feature_implementation_cycle` スキルを使用すること。**
 
 このスキルは以下を自動化します:
 - dashboard.mdへのタスク指示記載
@@ -102,13 +104,13 @@
 ### 使用方法
 
 ```bash
-/feature-implementation-cycle phase_name="Phase X: 機能名" task_description="実装内容の詳細" developer_type=backend_developer
+/feature_implementation_cycle phase_name="Phase X: 機能名" task_description="実装内容の詳細" developer_type=backend_developer
 
 # フロントエンド実装の例
-/feature-implementation-cycle phase_name="Phase 1: ログインUI" task_description="ログインフォームの実装" developer_type=frontend_developer
+/feature_implementation_cycle phase_name="Phase 1: ログインUI" task_description="ログインフォームの実装" developer_type=frontend_developer
 
 # バックエンド実装の例
-/feature-implementation-cycle phase_name="Phase 2: API認証" task_description="認証エンドポイントの実装" developer_type=backend_developer
+/feature_implementation_cycle phase_name="Phase 2: API認証" task_description="認証エンドポイントの実装" developer_type=backend_developer
 ```
 
 ### Phase完了後の必須確認事項
@@ -138,9 +140,9 @@
 - **緊急の修正**（1ファイルのみの軽微な変更）
 - **ドキュメント作成のみ**
 
-それ以外の機能実装は、**必ず `feature-implementation-cycle` スキルを使用すること。**
+それ以外の機能実装は、**必ず `feature_implementation_cycle` スキルを使用すること。**
 
-詳細は `.claude/skills/feature-implementation-cycle/SKILL.md` を参照。
+詳細は `.claude/skills/feature_implementation_cycle/SKILL.md` を参照。
 
 ---
 
@@ -181,7 +183,7 @@
 | 他のプロジェクトでも再利用できそうか？ | ✅ | ❌ |
 
 **自動チェック機能**:
-- `feature-implementation-cycle`スキル使用時、Phase完了後に自動的にこのチェックリストが表示されます
+- `feature_implementation_cycle`スキル使用時、Phase完了後に自動的にこのチェックリストが表示されます
 - `.claude/settings.json`のhookにより、「Phase実装完了」などのキーワード検出時にもチェックリストを表示
 
 **1つでもYesがある場合:**
@@ -218,25 +220,25 @@
 
 #### 最優先スキル（必須使用）
 
-1. **feature-implementation-cycle** ⭐必須⭐
+1. **feature_implementation_cycle** ⭐必須⭐
    - **用途**: Phase単位の機能実装（実装 → レビュー → 承認 → 履歴記録）
    - **使用タイミング**: フロントエンド/バックエンドの機能実装すべて
    - **重要度**: **Phase実装時は必ず使用すること**
-   - 詳細: `skills/feature-implementation-cycle/SKILL.md`
+   - 詳細: `skills/feature_implementation_cycle/SKILL.md`
 
 #### 推奨スキル（適宜使用）
 
-2. **quality-check**
+2. **quality_check**
    - **用途**: 品質チェック（typecheck + lint + test）を一括実行
    - **使用タイミング**: 実装後の動作確認、デバッグ時
    - 詳細: `.claude/skills/quality_check/SKILL.md`
 
-3. **plan-and-commit**
+3. **plan_and_commit**
    - **用途**: 実装前の詳細な実装計画立案とコミット
    - **使用タイミング**: 大規模機能の実装前、複雑な設計が必要な場合
-   - 詳細: `.claude/skills/plan-and-commit/SKILL.md`
+   - 詳細: `.claude/skills/plan_and_commit/SKILL.md`
 
-4. **skill-creator**
+4. **skill_creator**
    - **用途**: 繰り返しパターンからスキル定義を自動生成
    - **使用タイミング**: Phase完了時の振り返りで繰り返しパターンを発見した場合
    - 詳細: `.claude/skills/skill_creator/SKILL.md`
@@ -246,7 +248,7 @@
 1. Phase完了時の振り返りで繰り返しパターンを特定
 2. セクション9.2のチェックリストで判断
 3. スキル化が適切と判断した場合、ユーザーに報告・提案
-4. 承認後、skill-creatorを使用してスキル定義を生成
+4. 承認後、skill_creatorを使用してスキル定義を生成
 5. CLAUDE.mdのセクション9.5にスキル情報を追加
 
 ---
@@ -257,28 +259,24 @@
 
 ### 10.1 次のタスク（優先度: 最高）
 
-**Phase 2: 同期時エンベディング生成（優先度: 最高）**
+**Phase 3: ハイブリッド検索ロジック実装（優先度: 最高）**
 
-**目的**: Qiita記事同期時にGemini APIでエンベディングを生成し、documentsテーブルのembeddingカラムに保存する
+**目的**: セマンティック検索（pgvectorコサイン類似度）とキーワード検索（PostgreSQL全文検索）を組み合わせたハイブリッド検索を実装する
 
 **実装内容**:
-1. `sync-worker/src/sync-qiita.ts` を更新
-   - 記事同期時に `generateEmbedding()` を呼び出す
-   - 生成したエンベディングを `upsertDocument()` に渡す
-2. `sync-worker/src/db/documentRepository.ts` を更新
-   - `upsertDocument()` に `embedding?: number[]` パラメータを追加
-   - embeddingカラムへの保存ロジック実装
+1. `backend/src/services/searchService.ts` を更新
+   - セマンティック検索: クエリのエンベディング生成 → コサイン類似度で上位N件取得
+   - キーワード検索: 既存のpg_trgm + ILIKE検索を活用
+   - 結果のマージ・スコアリング・重複排除
+2. `backend/src/routes/search.ts` を更新
+   - ハイブリッド検索APIエンドポイントの実装
 3. TDDでテスト実装
 
-**成果物**:
-- `sync-worker/src/sync-qiita.ts`（更新）
-- `sync-worker/src/db/documentRepository.ts`（更新）
-- 対応テストファイルの更新
-
 **テスト項目**:
-- ✅ 記事同期時にエンベディングが生成される（モック）
-- ✅ 生成されたエンベディングがDBに保存される
-- ✅ エンベディング生成失敗時も記事同期は継続する（エラー耐性）
+- ✅ セマンティック検索が正常に動作する（モック）
+- ✅ キーワード検索との結果マージが正しく動作する
+- ✅ 重複排除・スコアリングが正常に動作する
+- ✅ エンベディング生成失敗時もキーワード検索にフォールバックする
 
 **実装時の注意**:
 - TDD徹底（Red → Green → Refactor）
@@ -289,6 +287,12 @@
 ---
 
 ### 10.2 実装完了した機能
+
+#### Phase 2: 同期時エンベディング生成（✅ 完了 - 2026-02-11）
+- Qiita記事同期時にGemini APIでエンベディングを生成し、documentsテーブルのembeddingカラムに保存
+- `DocumentInput` インターフェースに `embedding?: number[]` を追加
+- エンベディング生成失敗時も記事同期を継続するエラー耐性設計
+- テスト27件すべて成功、主要ファイルカバレッジ100%達成、ブランチカバレッジ81.81%
 
 #### Phase 1: Gemini APIクライアント実装（✅ 完了 - 2026-02-10）
 - Gemini API クライアント実装完了（generateEmbedding関数、768次元ベクトル生成）
@@ -334,7 +338,7 @@
 
 ### 開発原則
 1. **TDD徹底**: Red → Green → Refactor
-2. **スキル使用厳守**: Phase実装時は必ず `feature-implementation-cycle` を使用
+2. **スキル使用厳守**: Phase実装時は必ず `feature_implementation_cycle` を使用
 3. **Phase完了後の振り返り**: セクション9.2のチェックリストでスキル化の可能性を確認
 4. **dashboard.md**: エージェント間コミュニケーション（スキルで自動管理）
 5. **サブエージェント活用**: frontend_developer, backend_developer, typescript_reviewer, skill_creator

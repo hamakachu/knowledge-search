@@ -114,5 +114,64 @@ describe('documentRepository', () => {
       // Act & Assert: 例外がスローされることを確認
       await expect(upsertDocument(invalidDocument)).rejects.toThrow();
     });
+
+    it('upsertDocument_embeddingあり_embeddingがDBに保存される', async () => {
+      // Arrange: embeddingを含む記事データを準備（pgvectorのvector(768)型に合わせた768次元ベクトル）
+      const testEmbedding = Array.from({ length: 768 }, (_, i) => parseFloat((0.001 * (i + 1)).toFixed(6)));
+      const documentWithEmbedding: DocumentInput = {
+        id: 'test-repo-4',
+        title: 'Embedding Test Article',
+        body: 'Test body with embedding',
+        url: 'https://example.com/test-4',
+        author: 'test-author',
+        source: 'qiita_team',
+        created_at: new Date('2024-01-01T00:00:00Z'),
+        updated_at: new Date('2024-01-01T00:00:00Z'),
+        embedding: testEmbedding,
+      };
+
+      // Act: embeddingを含めてupsertを実行
+      await upsertDocument(documentWithEmbedding);
+
+      // Assert: DBにembeddingが保存されたことを確認
+      const result = await dbClient.query(
+        'SELECT id, title, embedding IS NOT NULL as has_embedding FROM documents WHERE id = $1',
+        ['test-repo-4']
+      );
+
+      expect(result.rows.length).toBe(1);
+      const savedDoc = result.rows[0];
+      expect(savedDoc.id).toBe('test-repo-4');
+      // embeddingカラムにNULL以外の値が保存されていることを確認
+      expect(savedDoc.has_embedding).toBe(true);
+    });
+
+    it('upsertDocument_embeddingなし_embeddingはNULLで保存される', async () => {
+      // Arrange: embeddingを含まない記事データを準備
+      const documentWithoutEmbedding: DocumentInput = {
+        id: 'test-repo-5',
+        title: 'No Embedding Article',
+        body: 'Test body without embedding',
+        url: 'https://example.com/test-5',
+        author: 'test-author',
+        source: 'qiita_team',
+        created_at: new Date('2024-01-01T00:00:00Z'),
+        updated_at: new Date('2024-01-01T00:00:00Z'),
+        // embeddingは省略
+      };
+
+      // Act: embeddingなしでupsertを実行
+      await upsertDocument(documentWithoutEmbedding);
+
+      // Assert: DBのembeddingがNULLであることを確認
+      const result = await dbClient.query(
+        'SELECT id, embedding FROM documents WHERE id = $1',
+        ['test-repo-5']
+      );
+
+      expect(result.rows.length).toBe(1);
+      const savedDoc = result.rows[0];
+      expect(savedDoc.embedding).toBeNull();
+    });
   });
 });

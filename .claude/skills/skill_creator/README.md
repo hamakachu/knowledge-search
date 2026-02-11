@@ -1,4 +1,4 @@
-# スキル作成スキル (skill-creator)
+# スキル作成スキル (skill_creator)
 
 ## 概要
 繰り返し発生するタスクパターンを分析し、再利用可能なスキルとして定義・生成するスキルです。
@@ -70,13 +70,13 @@ dashboard.mdの「サブエージェント → メインエージェント」セ
 
 ### After（スキル化後）
 ```
-「/quality-check を実行してください」
+「/quality_check を実行してください」
 ```
 
 または
 
 ```
-Task tool: quality-check スキル起動
+Task tool: quality_check スキル起動
 ```
 
 ## トラブルシューティング

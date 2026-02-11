@@ -1,8 +1,8 @@
-# quality-check スキル
+# quality_check スキル
 
 ## はじめに
 
-`quality-check` スキルは、TypeScriptプロジェクトの品質チェック（型チェック、Lint、テスト）を一括実行するためのスキルです。
+`quality_check` スキルは、TypeScriptプロジェクトの品質チェック（型チェック、Lint、テスト）を一括実行するためのスキルです。
 
 このスキルを使用することで、以下のような繰り返しタスクを効率化できます:
 - 実装完了後の動作確認
@@ -16,7 +16,7 @@
 
 ### 1. すべての品質チェックを実行
 ```
-/quality-check
+/quality_check
 ```
 
 これだけで、以下のチェックが一括実行されます:
@@ -26,17 +26,17 @@
 
 ### 2. カバレッジ付きでチェック
 ```
-/quality-check coverage=true
+/quality_check coverage=true
 ```
 
 ### 3. ビルドチェックも含める
 ```
-/quality-check build=true
+/quality_check build=true
 ```
 
 ### 4. バックエンドのみチェック
 ```
-/quality-check target=backend
+/quality_check target=backend
 ```
 
 ---
@@ -46,28 +46,28 @@
 ### シーン1: 実装完了後の確認
 ```
 # バックエンド実装完了後
-/quality-check target=backend
+/quality_check target=backend
 
 # フロントエンド実装完了後
-/quality-check target=frontend
+/quality_check target=frontend
 ```
 
 ### シーン2: レビュー前の最終確認
 ```
 # すべてのチェックを実行（カバレッジ + ビルド）
-/quality-check coverage=true build=true
+/quality_check coverage=true build=true
 ```
 
 ### シーン3: コード修正後の確認
 ```
 # 修正箇所に応じて対象を指定
-/quality-check target=backend
+/quality_check target=backend
 ```
 
 ### シーン4: ユーザー承認前の最終確認
 ```
 # すべてのプロジェクトを対象に全チェック
-/quality-check coverage=true build=true
+/quality_check coverage=true build=true
 ```
 
 ---
@@ -181,10 +181,10 @@
 ## ベストプラクティス
 
 1. **実装完了後は必ず実行**
-   - すべての実装完了後、`/quality-check` を実行してください
+   - すべての実装完了後、`/quality_check` を実行してください
 
 2. **レビュー前は完全チェック**
-   - レビュー依頼前は、`/quality-check coverage=true build=true` を実行してください
+   - レビュー依頼前は、`/quality_check coverage=true build=true` を実行してください
 
 3. **対象を絞って効率化**
    - バックエンドのみ修正した場合は、`target=backend` を指定して時間を節約
@@ -212,7 +212,7 @@
 
 これらすべてを一括実行するには:
 ```
-/quality-check coverage=true build=true
+/quality_check coverage=true build=true
 ```
 
 ---

@@ -1,10 +1,10 @@
 ---
-name: feature-implementation-cycle
+name: feature_implementation_cycle
 description: 機能実装の標準化されたサイクルを自動化する（実装→レビュー→承認→履歴記録）
 disable-model-invocation: false
 ---
 
-# feature-implementation-cycle
+# feature_implementation_cycle
 
 ## 概要
 機能実装の標準化されたサイクルを自動化するスキルです。dashboard.mdを通じたエージェント間連携、TDD実装、レビュー、承認、履歴管理までの一連のフローをオーケストレーションします。
@@ -26,7 +26,7 @@ disable-model-invocation: false
 ### 基本的な使い方
 ```
 メインエージェントから直接実行:
-"/feature-implementation-cycle"
+"/feature_implementation_cycle"
 または
 "Phase X の実装を進めてください"
 ```
@@ -43,9 +43,9 @@ disable-model-invocation: false
 
 **パラメータ指定例**:
 ```
-/feature-implementation-cycle phase_name="Phase 1: 基本認証" task_description="ユーザー認証とQiita Teamトークン管理機能の実装"
-/feature-implementation-cycle phase_name="Phase 2: 全文検索" task_description="PostgreSQL全文検索実装" developer_type=backend_developer
-/feature-implementation-cycle phase_name="Phase 3: 権限チェック" task_description="API権限チェック実装" target_files="qiitaClient.ts,permissionService.ts,search.ts"
+/feature_implementation_cycle phase_name="Phase 1: 基本認証" task_description="ユーザー認証とQiita Teamトークン管理機能の実装"
+/feature_implementation_cycle phase_name="Phase 2: 全文検索" task_description="PostgreSQL全文検索実装" developer_type=backend_developer
+/feature_implementation_cycle phase_name="Phase 3: 権限チェック" task_description="API権限チェック実装" target_files="qiitaClient.ts,permissionService.ts,search.ts"
 ```
 
 ---
@@ -126,7 +126,7 @@ disable-model-invocation: false
 
    **1つでもYesがある場合**:
    - スキル化を検討し、ユーザーに報告・提案してください
-   - 承認後、skill-creatorを使用してスキル定義を生成
+   - 承認後、skill_creatorを使用してスキル定義を生成
 
    **すべてNoの場合**:
    - スキル化不要、次のPhaseへ進んでください
@@ -198,7 +198,7 @@ disable-model-invocation: false
 
 ### 例1: Phase 1 基本認証の実装
 ```
-/feature-implementation-cycle phase_name="Phase 1: 基本認証" task_description="ユーザー認証とQiita Teamトークン管理機能の実装"
+/feature_implementation_cycle phase_name="Phase 1: 基本認証" task_description="ユーザー認証とQiita Teamトークン管理機能の実装"
 ```
 
 **実行されるフロー**:
@@ -238,7 +238,7 @@ disable-model-invocation: false
 
 ### 例2: Phase 2 PostgreSQL全文検索実装
 ```
-/feature-implementation-cycle phase_name="Phase 2: 全文検索" task_description="PostgreSQL全文検索実装（pg_trgm similarity + ILIKE検索）" target_files="searchService.ts,search.ts,search.test.ts"
+/feature_implementation_cycle phase_name="Phase 2: 全文検索" task_description="PostgreSQL全文検索実装（pg_trgm similarity + ILIKE検索）" target_files="searchService.ts,search.ts,search.test.ts"
 ```
 
 **実行されるフロー**:
@@ -256,7 +256,7 @@ disable-model-invocation: false
 
 ### 例3: フロントエンド実装
 ```
-/feature-implementation-cycle phase_name="Phase 1: ログインUI" task_description="ログインフォームコンポーネントの実装" developer_type=frontend_developer target_files="LoginForm.tsx,useAuth.ts"
+/feature_implementation_cycle phase_name="Phase 1: ログインUI" task_description="ログインフォームコンポーネントの実装" developer_type=frontend_developer target_files="LoginForm.tsx,useAuth.ts"
 ```
 
 **実行されるフロー**:
@@ -276,7 +276,7 @@ disable-model-invocation: false
 
 ### 例4: レビューをスキップして実装のみ
 ```
-/feature-implementation-cycle phase_name="Phase 1: 簡易機能" task_description="簡易な機能追加" skip_review=true
+/feature_implementation_cycle phase_name="Phase 1: 簡易機能" task_description="簡易な機能追加" skip_review=true
 ```
 
 **実行されるフロー**:
@@ -393,9 +393,9 @@ disable-model-invocation: false
 ---
 
 ## 関連スキル
-- [quality-check](../quality_check/SKILL.md): 品質チェック（typecheck + lint + test）を一括実行
-- [plan-and-commit](../plan-and-commit/SKILL.md): 実装前の詳細な実装計画立案
-- [skill-creator](../skill_creator/SKILL.md): スキル定義の生成・管理
+- [quality_check](../quality_check/SKILL.md): 品質チェック（typecheck + lint + test）を一括実行
+- [plan_and_commit](../plan_and_commit/SKILL.md): 実装前の詳細な実装計画立案
+- [skill_creator](../skill_creator/SKILL.md): スキル定義の生成・管理
 
 ---
 
