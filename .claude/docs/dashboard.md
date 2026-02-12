@@ -86,6 +86,48 @@
 
 ## 履歴
 
+### [2026-02-12] - Phase 5: 既存API呼び出し修正完了
+- **発信**: メインエージェント
+- **内容**: frontend_developer → typescript_reviewer の連携でPhase 5（既存API呼び出し修正）を実装
+- **結果**: ✅ ユーザー承認取得、変更反映完了
+- **成果**:
+  - 検索APIリクエストに `credentials: 'include'` を付与（セッションクッキー送信）
+  - 401レスポンス時に `logout()` を呼び出し、AuthContextのユーザー情報をクリア
+  - `App.tsx` の `isAuthenticated ? <SearchPage /> : <LoginPage />` ルーティングにより自動的にLoginPageへ遷移
+  - TDDサイクル（Red → Green → Refactor）の実践成功
+  - テスト72件すべて成功（カバレッジ87.11%）
+  - コード品質評価：保守性・安全性・パフォーマンスすべて優秀
+- **実装ファイル**:
+  - 新規作成: 1件（frontend/src/__tests__/hooks/useSearch.test.ts: 13テスト追加）
+  - 更新: 1件（frontend/src/hooks/useSearch.ts: credentials付与 + 401ハンドリング + useAuth統合）
+- **技術詳細**:
+  - `useSearch` に `useAuth` フックを統合（logout関数を取得）
+  - リダイレクトは明示的な window.location.href ではなく React 状態管理で実現
+  - `err instanceof Error` 型ガードによる型安全な例外処理
+- **次のステップ**: Phase 4（検索API更新）または他の候補実装
+
+### [2026-02-11] - Phase 3: ハイブリッド検索ロジック実装完了
+- **発信**: メインエージェント
+- **内容**: backend_developer → typescript_reviewer の連携でPhase 3（ハイブリッド検索ロジック実装）を実装
+- **結果**: ✅ ユーザー承認取得、変更反映完了
+- **成果**:
+  - セマンティック検索 + キーワード検索のハイブリッド検索実装完了
+  - `semanticSearch`: エンベディング生成 → pgvectorコサイン類似度検索、失敗時は空配列フォールバック
+  - `keywordSearch`: pg_trgm + ILIKE検索
+  - `hybridSearch`: 並列実行（Promise.all）+ 重み付きスコアリング（semantic×0.6 + keyword×0.4）+ 重複排除
+  - `?mode=keyword` でキーワード検索のみ、デフォルトでhybridSearch使用
+  - TDDサイクル（Red → Green → Refactor）の実践成功
+  - テスト74件すべて成功（カバレッジ84.51%）
+  - コード品質評価：保守性・安全性・パフォーマンスすべて良好
+- **実装ファイル**:
+  - 新規作成: 2件（backend/src/utils/geminiClient.ts, backend/src/__tests__/searchService.test.ts）
+  - 更新: 3件（backend/src/services/searchService.ts, backend/src/routes/search.ts, backend/src/__tests__/search.routes.test.ts）
+- **技術詳細**:
+  - USE_MOCK_GEMINI=true でのテスト可能性を確保（vi.mock でgeminiClientをモック化）
+  - `backend/src/utils/geminiClient.ts` は動的インポートによりrootDir制約を回避（as any 使用）
+  - 後方互換性のために `searchDocuments` を `keywordSearch` のラッパーとして維持
+- **次のステップ**: Phase 4（検索API更新）または他の候補実装
+
 ### [2026-02-11] - Phase 2: 同期時エンベディング生成実装完了
 - **発信**: メインエージェント
 - **内容**: backend_developer → typescript_reviewer の連携でPhase 2（同期時エンベディング生成）を実装
@@ -105,55 +147,6 @@
   - embeddingなしの場合はNULL保存（後から一括更新可能）
   - vi.mock でgeminiClientをモック化（外部API呼び出しなしでテスト可能）
 - **次のステップ**: Phase 3（ハイブリッド検索ロジック実装）
-
-### [2026-02-10] - Phase 1: Gemini APIクライアント実装完了
-- **発信**: メインエージェント
-- **内容**: backend_developer → typescript_reviewer の連携でPhase 1（Gemini APIクライアント実装）を実装
-- **結果**: ✅ ユーザー承認取得、変更反映完了
-- **成果**:
-  - Gemini APIクライアント実装完了（generateEmbedding関数）
-  - USE_MOCK_GEMINI=trueによるモック切り替え機能実装
-  - レート制限対策（4秒/リクエスト）実装
-  - リトライロジック（最大3回、指数バックオフ: 1秒→2秒→4秒）実装
-  - 入力バリデーション（空文字列・空白のみ）実装
-  - TDDサイクル（Red → Green → Refactor）の実践成功
-  - テスト22件すべて成功、geminiClient.ts 100%カバレッジ達成
-  - コード品質評価：保守性・安全性・パフォーマンスすべて優秀
-  - レビュー指摘修正：JSONキー名 `"default"` → `"embedding"` に変更（型安全性向上）
-- **実装ファイル**:
-  - 新規作成: 3件（geminiClient.ts, gemini-embeddings.json, geminiClient.test.ts）
-  - 更新: 2件（.env.example, package.json）
-- **技術詳細**:
-  - モデル: text-embedding-004（768次元ベクトル生成）
-  - pgvectorの vector(768) カラムと次元数が一致
-  - @google/generative-ai ^0.24.1 追加
-- **次のステップ**: Phase 2（同期時エンベディング生成）
-
-### [2026-02-09] - Phase 0: pgvector基盤構築実装完了
-- **発信**: メインエージェント
-- **内容**: backend_developer → typescript_reviewer の連携でPhase 0（pgvector基盤構築）を実装
-- **結果**: ✅ ユーザー承認取得、変更反映完了
-- **成果**:
-  - PostgreSQLにpgvector拡張を導入（pgvector/pgvector:pg16）
-  - embeddingカラム追加（vector(768)型）
-  - IVFFlatインデックス作成（高速な近似最近傍探索）
-  - pgvector動作確認テスト6件実装
-  - TDDサイクル（Red → Green → Refactor）の実践成功
-  - テスト58件すべて成功、テストカバレッジ81.11%達成（目標80%以上）
-  - コード品質評価：保守性・安全性・パフォーマンスすべて優秀
-- **実装ファイル**:
-  - 編集: 1件（docker-compose.yml）
-  - 新規作成: 2件（database/migrations/003_add_vector_support.sql, backend/src/__tests__/pgvector.test.ts）
-- **技術詳細**:
-  - CREATE EXTENSION vector（pgvector拡張有効化）
-  - ALTER TABLE documents ADD COLUMN embedding vector(768)（768次元ベクトル）
-  - CREATE INDEX ivfflat（コサイン類似度演算子、lists = 100）
-  - PostgreSQL 15→16へのメジャーバージョンアップ（docker compose down -v でボリューム再作成）
-- **推奨事項**:
-  - マイグレーション自動適用ツールの導入検討（中優先度）
-  - 本番環境でのインデックスチューニング（低優先度）
-- **次のステップ**: Phase 1（Gemini APIクライアント実装）
-
 
 ---
 

@@ -6,6 +6,54 @@
 
 ## アーカイブ履歴
 
+### [2026-02-10] - Phase 1: Gemini APIクライアント実装完了
+- **発信**: メインエージェント
+- **内容**: backend_developer → typescript_reviewer の連携でPhase 1（Gemini APIクライアント実装）を実装
+- **結果**: ✅ ユーザー承認取得、変更反映完了
+- **成果**:
+  - Gemini APIクライアント実装完了（generateEmbedding関数）
+  - USE_MOCK_GEMINI=trueによるモック切り替え機能実装
+  - レート制限対策（4秒/リクエスト）実装
+  - リトライロジック（最大3回、指数バックオフ: 1秒→2秒→4秒）実装
+  - 入力バリデーション（空文字列・空白のみ）実装
+  - TDDサイクル（Red → Green → Refactor）の実践成功
+  - テスト22件すべて成功、geminiClient.ts 100%カバレッジ達成
+  - コード品質評価：保守性・安全性・パフォーマンスすべて優秀
+  - レビュー指摘修正：JSONキー名 `"default"` → `"embedding"` に変更（型安全性向上）
+- **実装ファイル**:
+  - 新規作成: 3件（geminiClient.ts, gemini-embeddings.json, geminiClient.test.ts）
+  - 更新: 2件（.env.example, package.json）
+- **技術詳細**:
+  - モデル: text-embedding-004（768次元ベクトル生成）
+  - pgvectorの vector(768) カラムと次元数が一致
+  - @google/generative-ai ^0.24.1 追加
+- **次のステップ**: Phase 2（同期時エンベディング生成）
+
+### [2026-02-09] - Phase 0: pgvector基盤構築実装完了
+- **発信**: メインエージェント
+- **内容**: backend_developer → typescript_reviewer の連携でPhase 0（pgvector基盤構築）を実装
+- **結果**: ✅ ユーザー承認取得、変更反映完了
+- **成果**:
+  - PostgreSQLにpgvector拡張を導入（pgvector/pgvector:pg16）
+  - embeddingカラム追加（vector(768)型）
+  - IVFFlatインデックス作成（高速な近似最近傍探索）
+  - pgvector動作確認テスト6件実装
+  - TDDサイクル（Red → Green → Refactor）の実践成功
+  - テスト58件すべて成功、テストカバレッジ81.11%達成（目標80%以上）
+  - コード品質評価：保守性・安全性・パフォーマンスすべて優秀
+- **実装ファイル**:
+  - 編集: 1件（docker-compose.yml）
+  - 新規作成: 2件（database/migrations/003_add_vector_support.sql, backend/src/__tests__/pgvector.test.ts）
+- **技術詳細**:
+  - CREATE EXTENSION vector（pgvector拡張有効化）
+  - ALTER TABLE documents ADD COLUMN embedding vector(768)（768次元ベクトル）
+  - CREATE INDEX ivfflat（コサイン類似度演算子、lists = 100）
+  - PostgreSQL 15→16へのメジャーバージョンアップ（docker compose down -v でボリューム再作成）
+- **推奨事項**:
+  - マイグレーション自動適用ツールの導入検討（中優先度）
+  - 本番環境でのインデックスチューニング（低優先度）
+- **次のステップ**: Phase 1（Gemini APIクライアント実装）
+
 ### [2026-02-09] - 認証バリデーション修正・レビュー完了
 - **発信**: メインエージェント
 - **内容**: 認証バリデーション修正とDATABASE_URL読み込み修正 → typescript_reviewer レビュー → 型エラー修正

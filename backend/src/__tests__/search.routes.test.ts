@@ -35,7 +35,8 @@ describe('search routes', () => {
 
   describe('GET /api/search', () => {
     it('認証済みユーザーは検索結果を取得でき、権限フィルタリングが適用される', async () => {
-      const mockSearchResults = [
+      // hybridSearchは ScoredSearchResult[] を返す
+      const mockHybridResults = [
         {
           id: '1',
           title: 'TypeScript テスト',
@@ -43,6 +44,7 @@ describe('search routes', () => {
           author: 'user1',
           updatedAt: '2025-01-01T00:00:00.000Z',
           source: 'qiita',
+          score: 0.95,
         },
         {
           id: '2',
@@ -51,9 +53,11 @@ describe('search routes', () => {
           author: 'user2',
           updatedAt: '2025-01-02T00:00:00.000Z',
           source: 'qiita',
+          score: 0.85,
         },
       ];
 
+      // filterByPermissions は SearchResult[]（scoreなし）を返す
       const mockFilteredResults = [
         {
           id: '1',
@@ -65,7 +69,7 @@ describe('search routes', () => {
         },
       ];
 
-      vi.mocked(searchService.searchDocuments).mockResolvedValueOnce(mockSearchResults);
+      vi.mocked(searchService.hybridSearch).mockResolvedValueOnce(mockHybridResults);
       vi.mocked(permissionService.filterByPermissions).mockResolvedValueOnce(mockFilteredResults);
 
       // 認証済みアプリを作成
@@ -78,8 +82,40 @@ describe('search routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ results: mockFilteredResults });
+      // hybridSearchが呼ばれることを確認（ルートはデフォルトでhybrid検索を使用）
+      expect(searchService.hybridSearch).toHaveBeenCalledWith('TypeScript');
+      // filterByPermissionsには score なしの SearchResult[] が渡される
+      expect(permissionService.filterByPermissions).toHaveBeenCalledWith(1, [
+        { id: '1', title: 'TypeScript テスト', url: 'https://example.com/1', author: 'user1', updatedAt: '2025-01-01T00:00:00.000Z', source: 'qiita' },
+        { id: '2', title: 'TypeScript 応用', url: 'https://example.com/2', author: 'user2', updatedAt: '2025-01-02T00:00:00.000Z', source: 'qiita' },
+      ]);
+    });
+
+    it('modeパラメータがkeywordの場合はキーワード検索を使用する', async () => {
+      const mockSearchResults = [
+        {
+          id: '1',
+          title: 'TypeScript テスト',
+          url: 'https://example.com/1',
+          author: 'user1',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+          source: 'qiita',
+        },
+      ];
+
+      vi.mocked(searchService.searchDocuments).mockResolvedValueOnce(mockSearchResults);
+      vi.mocked(permissionService.filterByPermissions).mockResolvedValueOnce(mockSearchResults);
+
+      app = express();
+      app.use(express.json());
+      app.use(createMockSessionMiddleware(1));
+      app.use('/api/search', searchRouter);
+
+      const response = await request(app).get('/api/search?q=TypeScript&mode=keyword');
+
+      expect(response.status).toBe(200);
       expect(searchService.searchDocuments).toHaveBeenCalledWith('TypeScript');
-      expect(permissionService.filterByPermissions).toHaveBeenCalledWith(1, mockSearchResults);
+      expect(searchService.hybridSearch).not.toHaveBeenCalled();
     });
 
     it('未認証ユーザーは401エラーを返す', async () => {
@@ -93,7 +129,7 @@ describe('search routes', () => {
 
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('error');
-      expect(searchService.searchDocuments).not.toHaveBeenCalled();
+      expect(searchService.hybridSearch).not.toHaveBeenCalled();
     });
 
     it('クエリパラメータqが欠けている場合は400エラーを返す', async () => {
@@ -110,7 +146,7 @@ describe('search routes', () => {
     });
 
     it('権限フィルタリング中にエラーが発生した場合は500エラーを返す', async () => {
-      const mockSearchResults = [
+      const mockHybridResults = [
         {
           id: '1',
           title: 'TypeScript テスト',
@@ -118,10 +154,11 @@ describe('search routes', () => {
           author: 'user1',
           updatedAt: '2025-01-01T00:00:00.000Z',
           source: 'qiita',
+          score: 0.9,
         },
       ];
 
-      vi.mocked(searchService.searchDocuments).mockResolvedValueOnce(mockSearchResults);
+      vi.mocked(searchService.hybridSearch).mockResolvedValueOnce(mockHybridResults);
       vi.mocked(permissionService.filterByPermissions).mockRejectedValueOnce(
         new Error('Permission check failed')
       );
