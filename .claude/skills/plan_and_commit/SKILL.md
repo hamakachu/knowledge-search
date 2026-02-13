@@ -58,7 +58,6 @@ disable-model-invocation: false
      - 関連するデータベーススキーマやテーブル構造
      - 既存の実装パターン（Repository、Service層など）
      - テスト構造とテストファイルの配置
-     - dashboard.mdの内容確認（タスク指示の詳細把握）
    - 期待される結果: 実装に必要な情報が収集され、設計の土台ができる
 
 ### 3. **実装設計の作成（Plan Agent起動）**
@@ -237,7 +236,6 @@ disable-model-invocation: false
 - Plan Modeが利用可能であること（`EnterPlanMode` ツールが使用可能）
 - `.claude/docs/` ディレクトリが存在すること
 - Gitリポジトリが初期化されていること
-- dashboard.mdに実装タスクの指示が記載されていること（メインエージェント → サブエージェントセクション）
 
 ---
 
@@ -273,41 +271,6 @@ disable-model-invocation: false
 - snake_case を使用
 - タスクの内容を端的に表現
 - `-plan.md` で終わる
-
----
-
-## dashboard.mdとの連携
-
-このスキルは、`.claude/docs/dashboard.md` を通じてエージェント間連携を実施します。
-
-### メインエージェントの責務
-1. **実行前**: dashboard.mdの「メインエージェント → サブエージェント」セクションにタスク指示を記載
-2. **実行中**: Plan Modeでタスク内容を参照
-3. **実行後**: dashboard.mdの「サブエージェント → メインエージェント」セクションに結果を記載
-
-### 実行後の結果報告フォーマット（dashboard.md）
-```markdown
-**結果ステータス**: 完了
-
-**担当サブエージェント**: plan_and_commit
-
-**実行結果**:
-✅ Plan Mode起動完了
-✅ コードベース調査完了（Explore Agent）
-✅ 実装設計完了（Plan Agent）
-✅ Plan File作成: ~/.claude/plans/xxx.md
-✅ 実装計画をコピー: .claude/docs/xxx-plan.md
-✅ Gitコミット完了
-
-**作成したファイル**:
-- .claude/docs/[descriptive_name]_plan.md
-
-**問題点**:
-なし
-
-**推奨事項**:
-実装計画に従ってTDD実装を開始してください。
-```
 
 ---
 

@@ -33,11 +33,7 @@
 ## 2. エージェント間コミュニケーション
 
 ### 原則
-メインエージェントとサブエージェント間のやり取りは、**`.claude/docs/dashboard.md` を通じて行う。**
-
-**履歴の管理**:
-- dashboard.mdの「履歴」セクションには最新の3件まで保持
-- 古い履歴は `.claude/docs/archives.md` へ退避する
+メインエージェントとサブエージェント間のやり取りは、**Task toolのプロンプトに直接タスク指示を記載し、サブエージェントのレスポンスで結果を受け取る。**
 
 ### サブエージェントの種類
 
@@ -45,10 +41,6 @@
 - **backend_developer**: バックエンド実装（Express + TypeScript + PostgreSQL）
 - **typescript_reviewer**: TypeScriptコードのレビュー
 - **skill_creator**: スキル定義の生成・管理
-
-**注意**:
-- dashboard.mdおよびarchives.mdの内容を、それを記載したエージェントのコンテキストへ保存しないこと。
-- dashboard.mdを通じた連携の詳細は、`feature_implementation_cycle` スキルで自動化される（セクション7参照）
 
 ---
 
@@ -94,12 +86,11 @@
 **Phase単位の機能実装は、必ず `feature_implementation_cycle` スキルを使用すること。**
 
 このスキルは以下を自動化します:
-- dashboard.mdへのタスク指示記載
 - 実装サブエージェント起動（frontend_developer / backend_developer）
 - TDD実装サイクル（Red → Green → Refactor）
 - typescript_reviewerによるレビュー実施
 - ユーザー承認取得プロセス
-- dashboard.md履歴管理（最新3件保持、archives.md退避）
+- CLAUDE.md更新（実装完了履歴の記録）
 
 ### 使用方法
 
@@ -331,16 +322,15 @@
 1. **TDD徹底**: Red → Green → Refactor
 2. **スキル使用厳守**: Phase実装時は必ず `feature_implementation_cycle` を使用
 3. **Phase完了後の振り返り**: セクション9.2のチェックリストでスキル化の可能性を確認
-4. **dashboard.md**: エージェント間コミュニケーション（スキルで自動管理）
-5. **サブエージェント活用**: frontend_developer, backend_developer, typescript_reviewer, skill_creator
+4. **サブエージェント活用**: frontend_developer, backend_developer, typescript_reviewer, skill_creator
 6. **各種ルール参照**: `.claude/rules/` 配下の各種mdファイル
 
 ### Phase完了時のチェックリスト
 
 ✅ 実装完了（テスト・Lint・型チェックすべてパス）
 ✅ ユーザー承認取得
-✅ dashboard.md履歴に記録
-✅ **スキル化の可能性を確認**（セクション9.2参照）← **新規追加**
+✅ CLAUDE.md履歴に記録（セクション10.2）
+✅ **スキル化の可能性を確認**（セクション9.2参照）
 ✅ 次のPhaseへ進む
 
 **すべての開発工程でこのルールを遵守すること。**
