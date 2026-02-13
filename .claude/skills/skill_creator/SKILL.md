@@ -16,14 +16,14 @@ disable-model-invocation: false
 ### 基本的な使い方
 ```
 メインエージェントから呼び出す:
-1. Task toolで skill_creator エージェントを起動
-2. プロンプトにスキル化したいタスクの詳細を直接記載
-3. レスポンスで結果を確認
+1. dashboard.mdの「メインエージェント → サブエージェント」セクションにタスク指示を記載
+2. Task toolで skill_creator エージェントを起動
+3. dashboard.mdの「サブエージェント → メインエージェント」セクションで結果を確認
 ```
 
 ### パラメータ
 
-プロンプトに記載する内容:
+dashboard.mdに記載する内容:
 
 | 項目 | 必須/任意 | 説明 |
 |-----|---------|------|
@@ -37,7 +37,7 @@ disable-model-invocation: false
 ## 実行フロー
 
 1. **パターン分析**
-   - プロンプトから対象タスクを読み取り
+   - dashboard.mdから対象タスクを読み取り
    - 繰り返しパターンを抽出
    - スキル化の妥当性を判断
    - 期待される結果: スキル化すべきかどうかの判断
@@ -61,7 +61,7 @@ disable-model-invocation: false
    - 期待される結果: ドキュメントの更新
 
 5. **結果報告**
-   - レスポンスに結果を記載
+   - dashboard.mdに結果を記載
    - 作成したファイルリストを提示
    - 使用方法を説明
    - 期待される結果: メインエージェントへの報告完了
@@ -72,45 +72,57 @@ disable-model-invocation: false
 
 ### 例1: 品質チェックスキルの作成
 
-**プロンプトに記載するタスク指示**:
-```
+**dashboard.mdに記載するタスク指示**:
+```markdown
+**タスクステータス**: スキル作成依頼
+
+**担当サブエージェント**: skill_creator
+
+**タスク内容**:
 以下の繰り返しパターンをスキル化したい
 
-繰り返し回数: 5回
+**繰り返し回数**: 5回
 
-具体例:
+**具体例**:
 1. 「動作確認をしてください」→ typecheck + lint + test を実行
 2. 「品質チェックをお願いします」→ typecheck + lint + test を実行
 3. 「テストが通るか確認してください」→ typecheck + lint + test を実行
 
-スキル名候補: quality_check
+**スキル名候補**: quality_check
 ```
 
 **期待される出力**:
 - `skills/quality_check/SKILL.md` 作成
 - `skills/quality_check/README.md` 作成
 - `CLAUDE.md` にスキル情報追加
+- dashboard.mdに結果報告
 
 ### 例2: APIエンドポイント追加スキルの作成
 
-**プロンプトに記載するタスク指示**:
-```
+**dashboard.mdに記載するタスク指示**:
+```markdown
+**タスクステータス**: スキル作成依頼
+
+**担当サブエージェント**: skill_creator
+
+**タスク内容**:
 新しいAPIエンドポイントを追加する定型作業をスキル化したい
 
-繰り返し回数: 3回
+**繰り返し回数**: 3回
 
-具体例:
+**具体例**:
 1. `/api/stats` エンドポイント追加: ルーティング + サービス + テスト
 2. `/api/search` エンドポイント追加: ルーティング + サービス + テスト
 3. `/api/documents` エンドポイント追加: ルーティング + サービス + テスト
 
-スキル名候補: api_endpoint_add
+**スキル名候補**: api-endpoint-add
 ```
 
 **期待される出力**:
 - `skills/api_endpoint_add/SKILL.md` 作成
 - `skills/api_endpoint_add/README.md` 作成
 - `CLAUDE.md` にスキル情報追加
+- dashboard.mdに結果報告
 
 ---
 
@@ -127,6 +139,7 @@ disable-model-invocation: false
 
 ## 前提条件
 - CLAUDE.mdに記載されたスキル化の原則を理解していること
+- dashboard.mdを通じたエージェント間連携が確立していること
 - `skills/` ディレクトリが存在すること
 
 ---
@@ -149,6 +162,7 @@ disable-model-invocation: false
 ## 関連ドキュメント
 - [CLAUDE.md](../../CLAUDE.md): スキル化の原則
 - [テンプレート](../_template/SKILL.md): スキル定義のテンプレート
+- [dashboard.md](../../.claude/docs/dashboard.md): エージェント間連携
 
 ---
 

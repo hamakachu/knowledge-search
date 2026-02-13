@@ -19,8 +19,9 @@
 
 **起動手順**:
 1. スキル化の必要性をユーザーに確認（繰り返し回数、複雑性など）
-2. ユーザーが承認した場合、Task toolで skill_creator エージェントを起動（プロンプトにタスク指示を直接記載）
-3. レスポンスで結果を確認し、ユーザーに報告
+2. ユーザーが承認した場合、dashboard.mdにタスク指示を記載
+3. Task toolで skill_creator エージェントを起動
+4. dashboard.mdで結果を確認し、ユーザーに報告
 
 **判断基準**:
 - ✅ 同じタスクが3回以上発生
@@ -42,8 +43,9 @@
 
 **起動手順**:
 1. タスク内容を整理（TDD必須）
-2. Task toolで frontend_developer エージェントを起動（プロンプトにタスク指示を直接記載）
-3. 実装完了後、typescript_reviewer でレビュー
+2. dashboard.mdにタスク指示を記載
+3. Task toolで frontend_developer エージェントを起動
+4. 実装完了後、typescript_reviewer でレビュー
 
 ---
 
@@ -58,8 +60,9 @@
 
 **起動手順**:
 1. タスク内容を整理（TDD必須）
-2. Task toolで backend_developer エージェントを起動（プロンプトにタスク指示を直接記載）
-3. 実装完了後、typescript_reviewer でレビュー
+2. dashboard.mdにタスク指示を記載
+3. Task toolで backend_developer エージェントを起動
+4. 実装完了後、typescript_reviewer でレビュー
 
 ---
 
@@ -74,8 +77,9 @@
 
 **起動手順**:
 1. レビュー対象ファイルを特定
-2. Task toolで typescript_reviewer エージェントを起動（プロンプトにレビュー対象と変更内容を直接記載）
-3. レスポンスのレビュー結果に基づいて修正または承認
+2. dashboard.mdにレビュー指示を記載
+3. Task toolで typescript_reviewer エージェントを起動
+4. レビュー結果に基づいて修正または承認
 
 ---
 
@@ -96,7 +100,7 @@
 ### 注意事項
 
 - **承認の原則**: ユーザーの承認なしにエージェントを起動しない
-- **直接コミュニケーション**: タスク指示はプロンプトに直接記載し、結果はレスポンスで受け取る
+- **dashboard.md連携**: すべてのエージェント起動は dashboard.md を経由
 - **TDDの徹底**: 開発エージェント（frontend/backend）は必ずTDDで実装
 - **レビューの必須化**: 実装完了後は必ず typescript_reviewer でレビュー
 
@@ -107,20 +111,40 @@
 ### パターンA: フロント + バック連携
 
 ```
-1. frontend_developer 起動 → API必要性を検出（レスポンスで報告）
-2. backend_developer 起動 → API実装（プロンプトにAPI要件を直接記載）
-3. backend_developer が API完了をレスポンスで報告
-4. frontend_developer が API統合を完了（2回目の起動）
-5. typescript_reviewer でレビュー
+1. frontend_developer 起動 → API必要性を検出
+2. dashboard.mdの「フロントエンド → バックエンド」セクションに記載
+3. backend_developer 起動 → API実装
+4. dashboard.mdの「バックエンド → フロントエンド」セクションで完了通知
+5. frontend_developer が API統合を完了
+6. typescript_reviewer でレビュー
 ```
 
 ### パターンB: メイン直接実装 + レビュー
 
 ```
 1. メインエージェントが直接実装（TDD）
-2. typescript_reviewer でレビュー（プロンプトにレビュー対象を直接記載）
-3. 修正 or ユーザー承認
+2. dashboard.mdにレビュー指示を記載
+3. typescript_reviewer でレビュー
+4. 修正 or ユーザー承認
 ```
+
+---
+
+## トリガーパターン検出の実装ガイドライン
+
+メインエージェントは以下を常に監視:
+
+1. **ユーザーの発言内容**
+   - キーワード検出（「スキル化」「繰り返し」「自動化」など）
+   - タスクの種類（フロント/バック/レビュー）
+
+2. **タスクの繰り返し**
+   - 同じようなタスクが複数回発生していないか
+   - dashboard.mdの履歴を参照
+
+3. **実装ステータス**
+   - 実装完了 → レビューが必要
+   - レビュー完了 → ユーザー承認が必要
 
 ---
 
@@ -128,5 +152,4 @@
 
 | 日付 | バージョン | 変更内容 |
 |-----|----------|---------|
-| 2026-02-13 | 2.0.0 | dashboard.md廃止、直接コミュニケーションに移行 |
 | 2026-02-04 | 1.0.0 | 初版作成 |
