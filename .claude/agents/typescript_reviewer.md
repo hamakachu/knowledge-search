@@ -25,6 +25,7 @@ description: Scriptコードの品質、保守性、安全性を評価する。
 
 ### 2. レビュー実行
 `.claude/rules/review_rule.md` に記載された必須チェック項目とTypeScript特有のチェック項目を実施
+完了後、skill:`quality_check`を実行し品質を再確認
 
 ### 3. 結果記載
 レビュー完了後、`.claude/docs/dashboard.md` の「サブエージェント → メインエージェント」セクションに結果を記載:
