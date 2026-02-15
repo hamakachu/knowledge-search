@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "sync": "vite-node src/index.ts",
+    "cron": "vite-node src/cronRunner.ts",
     "dev": "vite-node --watch src/index.ts",
     "build": "vite build",
     "start": "node dist/index.js",
+    "start:cron": "node dist/cronRunner.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -18,12 +20,15 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "cron-parser": "^4.9.0",
     "dotenv": "^16.4.1",
+    "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
     "pg": "^8.11.3"
   },
   "devDependencies": {
     "@types/node": "^20.11.5",
+    "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.10.9",
     "@vitest/coverage-v8": "^1.2.1",
     "vite": "^5.0.12",

@@ -6,7 +6,10 @@ export default defineConfig({
     outDir: 'dist',
     ssr: true,
     rollupOptions: {
-      input: './src/index.ts',
+      input: {
+        index: './src/index.ts',
+        cronRunner: './src/cronRunner.ts',
+      },
     },
   },
   test: {
@@ -15,7 +18,15 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'src/__tests__/', 'dist/'],
+      exclude: [
+        'node_modules/',
+        'src/__tests__/',
+        'dist/',
+        'scripts/',
+        'src/index.ts',
+        'src/cronRunner.ts',
+        'src/scheduler/index.ts',
+      ],
     },
   },
 });

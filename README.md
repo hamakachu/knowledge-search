@@ -1,11 +1,11 @@
 # Groovy Knowledge Search
 
-社内ドキュメント(Qiita Team / Google Drive / SharePointなど)を横断検索できるアプリケーション
+Qiita Team の記事をセマンティック検索・キーワード検索できるアプリケーション
 
 ## 概要
 
-社内に分散しているドキュメントを一元的に検索できるシステム。
-MVP段階では **Qiita Team** のみに対応し、最小限の機能で「使える状態」を目指す。
+Qiita Team の記事を検索できるナレッジ検索システム。
+セマンティック検索（ベクトル検索）とキーワード検索を組み合わせたハイブリッド検索に対応。
 
 ## 主な機能
 
@@ -292,13 +292,11 @@ docker exec -i groovy-knowledge-search-db psql -U postgres -d groovy_knowledge_s
 - 日次で自動的にデータが更新される
 - 社内ネットワークからアクセス可能
 
-## Next Steps (Phase 2以降)
+## Next Steps
 
-- Google Drive 連携
-- OneDrive 連携
-- ユーザー認証・権限制御
 - 検索精度改善
-- セマンティック検索(RAG)の検証
+- 検索結果のフィルタリング・ソート・ページネーション
+- E2Eテストの追加
 
 ## ライセンス
 

@@ -31,6 +31,11 @@ async function clearTestData(): Promise<void> {
   for (const id of FIXTURE_ARTICLE_IDS) {
     await dbClient.query('DELETE FROM documents WHERE id = $1', [id]);
   }
+  // URLでも削除（unique_source_url制約対策）
+  await dbClient.query(
+    'DELETE FROM documents WHERE url LIKE $1',
+    ['https://example.qiita.com/items/%']
+  );
 }
 
 describe('syncQiitaTeam', () => {
@@ -103,13 +108,13 @@ describe('syncQiitaTeam', () => {
     // Act: syncQiitaTeam()を実行
     await syncQiitaTeam();
 
-    // Assert: DBにembeddingが保存されたことを確認
+    // Assert: DBにembeddingが保存されたことを確認（フィクスチャ記事IDでフィルタ）
     const result = await dbClient.query(
-      'SELECT id, embedding IS NOT NULL as has_embedding FROM documents WHERE source = $1',
-      ['qiita_team']
+      'SELECT id, embedding IS NOT NULL as has_embedding FROM documents WHERE id = ANY($1)',
+      [FIXTURE_ARTICLE_IDS]
     );
 
-    expect(result.rows.length).toBeGreaterThanOrEqual(3);
+    expect(result.rows.length).toBe(3);
     // すべての記事にembeddingが保存されていることを確認
     for (const row of result.rows) {
       expect(row.has_embedding).toBe(true);

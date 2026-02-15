@@ -12,7 +12,7 @@
 -- ============================================
 -- テーブル: documents
 -- ============================================
--- 社内ドキュメント（Qiita Team / Google Drive / OneDrive）を保存
+-- Qiita Team 記事を保存
 --
 CREATE TABLE IF NOT EXISTS documents (
   -- 主キー（ソース元のID）
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS documents (
   body TEXT NOT NULL,
   url TEXT NOT NULL,
   author VARCHAR(255) NOT NULL,
-  source VARCHAR(50) NOT NULL, -- 'qiita_team', 'google_drive', 'onedrive'
+  source VARCHAR(50) NOT NULL, -- 'qiita_team'
 
   -- タイムスタンプ
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,

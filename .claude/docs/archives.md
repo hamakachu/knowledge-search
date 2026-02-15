@@ -6,6 +6,30 @@
 
 ## アーカイブ履歴
 
+### [2026-02-12] - Phase 5: 既存API呼び出し修正実装完了
+- **発信**: メインエージェント
+- **内容**: backend_developer → typescript_reviewer の連携でPhase 5（既存API呼び出し修正）を実装
+- **結果**: ✅ ユーザー承認取得、変更反映完了
+- **成果**:
+  - 検索APIリクエストに `credentials: 'include'` 付与（セッションクッキー送信）
+  - 401レスポンス時に `logout()` → `AuthContext` ユーザー情報クリア → LoginPage 自動遷移
+  - `useSearch` フックに `useAuth` 統合、型安全なエラーハンドリング実装
+  - テスト72件すべて成功、カバレッジ87.11%達成
+- **次のステップ**: Phase 6（Sync Worker cron設定）
+
+### [2026-02-11] - Phase 3: ハイブリッド検索ロジック実装完了
+- **発信**: メインエージェント
+- **内容**: backend_developer → typescript_reviewer の連携でPhase 3（ハイブリッド検索ロジック）を実装
+- **結果**: ✅ ユーザー承認取得、変更反映完了
+- **成果**:
+  - セマンティック検索（pgvectorコサイン類似度）+ キーワード検索（pg_trgm + ILIKE）のハイブリッド検索実装完了
+  - `semanticSearch` / `keywordSearch` / `hybridSearch` 関数を `searchService.ts` に追加
+  - 並列実行（Promise.all）+ 重み付きスコアリング（semantic×0.6 + keyword×0.4）+ 重複排除
+  - エンベディング生成失敗時はキーワード検索にフォールバック
+  - `?mode=keyword` でキーワード検索のみ切り替え可能
+  - テスト74件すべて成功、カバレッジ84.51%達成
+- **次のステップ**: Phase 4（検索API更新）
+
 ### [2026-02-10] - Phase 1: Gemini APIクライアント実装完了
 - **発信**: メインエージェント
 - **内容**: backend_developer → typescript_reviewer の連携でPhase 1（Gemini APIクライアント実装）を実装
