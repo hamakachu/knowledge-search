@@ -156,13 +156,4 @@ cd ../backend && pnpm test  # backend
 
 ---
 
-## 実装進捗（途中まで）
-
-以下のファイルは作成済み（ただし実装は未完了）:
-
-1. ✅ `database/migrations/004_update_vector_dimension.sql` - マイグレーションファイル作成済み
-2. ✅ `sync-worker/package.json` - 依存関係更新済み（openai追加、@google/generative-ai削除）
-3. ⏸️ `sync-worker/src/clients/__tests__/openaiClient.test.ts` - テストファイル作成済み
-4. ⏸️ `sync-worker/src/__fixtures__/embeddings.json` - フィクスチャファイル作成途中
-
-残りの実装は未着手。
+実装は未着手。
