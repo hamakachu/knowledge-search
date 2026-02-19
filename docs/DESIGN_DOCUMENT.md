@@ -5,8 +5,7 @@
 ### 1.1 目的
 
 社内ナレッジ（Qiita Team記事）を統合的に検索できるWebアプリケーション。
-セマンティック検索（意味検索）とキーワード検索を組み合わせたハイブリッド検索により、
-関連性の高い記事を効率的に発見できる。
+セマンティック検索とキーワード検索を組み合わせたハイブリッド検索により、関連性の高い記事を効率的に発見できる。
 
 ### 1.2 主要機能
 
@@ -14,59 +13,40 @@
 |------|------|
 | ハイブリッド検索 | セマンティック検索 + キーワード検索の組み合わせ |
 | 権限ベースフィルタリング | ユーザーのQiita Team権限に基づく検索結果のフィルタリング |
-| 自動同期 | Qiita Team記事の日次自動同期（cron） |
-| ベクトル検索 | AI（Gemini API）によるテキストのベクトル化と類似度検索 |
+| 自動同期 | Qiita Team記事の日次自動同期（毎日午前2時） |
+| ベクトル検索 | AI Embedding APIによるテキストのベクトル化と類似度検索 |
 
 ---
 
 ## 2. システムアーキテクチャ
 
-### 2.1 全体構成図
-
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              Groovy Knowledge Search                         │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐       │
-│  │     Frontend     │    │     Backend      │    │   Sync Worker    │       │
-│  │   (React + TS)   │◄──►│  (Express + TS)  │    │   (Node.js)      │       │
-│  │   Port: 5173     │    │   Port: 3000     │    │   cron: 毎日2時  │       │
-│  └──────────────────┘    └────────┬─────────┘    └────────┬─────────┘       │
-│           │                       │                       │                  │
-│           │                       │                       │                  │
-│           │              ┌────────▼─────────┐             │                  │
-│           │              │    PostgreSQL    │◄────────────┘                  │
-│           │              │  (pgvector拡張)  │                                │
-│           │              │   Port: 5432     │                                │
-│           │              └──────────────────┘                                │
-│           │                                                                  │
-└───────────┼──────────────────────────────────────────────────────────────────┘
-            │
-            │ 外部サービス連携
-            ▼
-┌───────────────────────────────────────────────────────────────────────────────┐
-│                           External Services                                    │
-│                                                                                │
-│  ┌─────────────────────────┐         ┌─────────────────────────┐             │
-│  │      Qiita Team API     │         │    Google Gemini API    │             │
-│  │  ・記事取得（同期用）    │         │  ・テキスト→ベクトル変換 │             │
-│  │  ・権限確認（検索時）    │         │  ・768次元ベクトル生成   │             │
-│  └─────────────────────────┘         └─────────────────────────┘             │
-│                                                                                │
-└───────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    Groovy Knowledge Search                       │
+│                                                                  │
+│  Frontend (React)  ◄──►  Backend (Express)  ◄──►  PostgreSQL    │
+│     :5173                   :3000                 (pgvector)     │
+│                                                      ▲           │
+│                                               Sync Worker        │
+│                                               (cron: 毎日2時)    │
+└──────────────────────────────┬───────────────────────────────────┘
+                               │
+           ┌───────────────────┼───────────────────┐
+           ▼                   ▼                   ▼
+    ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+    │ Qiita Team  │     │ Gemini API  │     │ OpenAI API  │
+    │    API      │     │  (現在)     │     │ (移行予定)  │
+    └─────────────┘     └─────────────┘     └─────────────┘
 ```
 
-### 2.2 技術スタック
+### 技術スタック
 
-| レイヤー | 技術 | バージョン |
-|---------|------|-----------|
-| フロントエンド | React + TypeScript + Tailwind CSS | React 18, TS 5.x |
-| バックエンド | Express.js + TypeScript | Express 4.x, TS 5.x |
-| データベース | PostgreSQL + pgvector | PostgreSQL 16 |
-| ランタイム | Node.js | 20 LTS |
-| パッケージ管理 | pnpm | 8.x |
-| コンテナ | Docker Compose | - |
+| レイヤー | 技術 |
+|---------|------|
+| フロントエンド | React 18 + TypeScript + Tailwind CSS |
+| バックエンド | Express.js + TypeScript |
+| データベース | PostgreSQL 16 + pgvector |
+| ランタイム | Node.js 20 LTS |
 
 ---
 
@@ -74,76 +54,54 @@
 
 ### 3.1 Qiita Team API
 
-#### 3.1.1 概要
-
 | 項目 | 内容 |
 |------|------|
-| サービス名 | Qiita Team |
-| API Base URL | `https://qiita.com/api/v2` |
 | 認証方式 | Bearer Token (Personal Access Token) |
-| トークン形式 | `qiita_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` (41文字) |
-
-#### 3.1.2 必要な権限（スコープ）
-
-| 権限名 | 必須/任意 | 用途 |
-|--------|---------|------|
-| **read_qiita** | **必須** | 記事の読み取り、記事一覧の取得 |
-| write_qiita | 不要 | 本システムでは記事の書き込みは行わない |
-
-#### 3.1.3 使用するAPIエンドポイント
-
-| エンドポイント | メソッド | 用途 | 呼び出し元 |
-|---------------|---------|------|-----------|
-| `GET /items` | GET | 記事一覧の取得（同期用） | Sync Worker |
-| `GET /items/{id}` | GET | 記事詳細の取得（権限確認用） | Backend |
-
-#### 3.1.4 トークン取得方法
-
-1. Qiita Team にログイン
-2. 設定 → アプリケーション → 「個人用アクセストークン」
-3. 「新しいトークンを発行する」をクリック
-4. スコープ「read_qiita」にチェック
-5. 発行されたトークンを安全に保管
-
-**トークン取得URL**: https://qiita.com/settings/tokens
+| **必要スコープ** | **`read_qiita`**（記事の読み取り） |
+| 使用エンドポイント | `GET /items`（記事一覧）、`GET /items/{id}`（権限確認） |
+| トークン取得URL | https://qiita.com/settings/tokens |
 
 ---
 
-### 3.2 Google Gemini API
+### 3.2 Embedding API（Gemini / OpenAI）
 
-#### 3.2.1 概要
+#### API比較表
 
-| 項目 | 内容 |
-|------|------|
-| サービス名 | Google Gemini API (Generative AI) |
-| 用途 | テキストのベクトル化（Embedding生成） |
-| モデル名 | `text-embedding-004` |
-| 出力次元 | 768次元ベクトル |
+| 項目 | Google Gemini API（現在） | OpenAI API（移行予定） |
+|------|--------------------------|----------------------|
+| モデル | `text-embedding-004` | `text-embedding-3-small` |
+| 出力次元 | 768次元 | 1536次元 |
+| **必要な権限** | Generative Language API有効化 | APIキー発行のみ |
+| APIキー取得URL | https://console.cloud.google.com/ | https://platform.openai.com/api-keys |
 
-#### 3.2.2 必要な権限
+#### 料金
 
-| 権限/API | 必須/任意 | 用途 |
-|---------|---------|------|
-| **Generative Language API** | **必須** | Embedding生成 |
+| 項目 | Gemini API | OpenAI API |
+|------|-----------|-----------|
+| 無料枠 | あり（60 RPM） | なし |
+| 従量課金 | 入力トークン数ベース | **$0.02 / 1M tokens** |
+| レート制限 | 60 RPM | 3,000 RPM |
 
-#### 3.2.3 APIキー取得方法
+**月額料金の目安（OpenAI API）**:
+- 記事1000件 × 平均2000トークン = 2Mトークン/月
+- 月額約 **$0.04**（初回同期時のみ、以降は差分のみ）
 
-1. Google Cloud Console にアクセス
-2. プロジェクトを作成または選択
-3. 「APIとサービス」→「ライブラリ」
-4. 「Generative Language API」を検索して有効化
-5. 「認証情報」→「認証情報を作成」→「APIキー」
-6. 発行されたAPIキーを安全に保管
+#### データプライバシー・学習利用ポリシー
 
-**Google Cloud Console**: https://console.cloud.google.com/
+| 項目 | Gemini API | OpenAI API |
+|------|-----------|-----------|
+| **モデル学習への利用** | **されない** ※1 | **されない** ※2 |
+| データ保持期間 | リクエスト処理後に削除 | 30日間（不正利用監視目的） |
+| 根拠 | Google Cloud データ処理規約 | OpenAI API Data Usage Policy |
 
-#### 3.2.4 料金について
+**※1 Gemini API**: Google Cloud Platform経由のAPI利用では、顧客データはモデルのトレーニングに使用されない。
+- 参考: https://cloud.google.com/terms/data-processing-addendum
 
-| 項目 | 内容 |
-|------|------|
-| 無料枠 | 月間60クエリ/分 (RPM) |
-| 課金体系 | 従量課金（入力トークン数に基づく） |
-| 参考URL | https://ai.google.dev/pricing |
+**※2 OpenAI API**: 2023年3月以降、APIを通じて送信されたデータはモデルのトレーニングに使用されない（デフォルト）。
+- 参考: https://openai.com/policies/api-data-usage-policies
+- 明示的なオプトイン設定をしない限り、学習には使用されない
+
+> **重要**: 両APIとも、**社内記事データがAIモデルの学習に使用されることはありません**。
 
 ---
 
@@ -151,375 +109,105 @@
 
 ### 4.1 認証・セッション管理
 
-#### 4.1.1 認証フロー
-
-```
-┌─────────────┐     POST /api/auth/login      ┌─────────────┐
-│  Frontend   │ ─────────────────────────────► │   Backend   │
-│  (ブラウザ)  │     username, email,          │  (Express)  │
-└─────────────┘     qiitaToken                 └──────┬──────┘
-                                                       │
-                                                       ▼
-                                               ┌──────────────┐
-                                               │ 入力検証     │
-                                               │ ・email形式  │
-                                               │ ・token形式  │
-                                               └──────┬───────┘
-                                                       │
-                                                       ▼
-                                               ┌──────────────┐
-                                               │ ユーザー処理  │
-                                               │ ・新規登録    │
-                                               │ ・既存更新    │
-                                               └──────┬───────┘
-                                                       │
-                                                       ▼
-                                               ┌──────────────┐
-                                               │ トークン暗号化│
-                                               │ (AES-256-GCM)│
-                                               └──────┬───────┘
-                                                       │
-                                                       ▼
-                                               ┌──────────────┐
-                                               │ セッション作成│
-                                               │ (PostgreSQL) │
-                                               └──────┬───────┘
-                                                       │
-┌─────────────┐     Set-Cookie: connect.sid    ◄───────┘
-│  Frontend   │ ◄─────────────────────────────
-└─────────────┘     (HttpOnly, Secure, SameSite)
-```
-
-#### 4.1.2 セッション設定
-
-| 設定項目 | 値 | 目的 |
-|---------|-----|------|
-| `HttpOnly` | `true` | JavaScriptからのCookieアクセスを禁止（XSS対策） |
-| `Secure` | `true` (本番環境) | HTTPS通信時のみCookie送信 |
-| `SameSite` | `lax` | クロスサイトリクエスト制限（CSRF対策） |
-| `maxAge` | 7日間 | セッション有効期限 |
-| ストレージ | PostgreSQL | サーバーサイドでセッション管理 |
+| 項目 | 実装 |
+|------|------|
+| 認証方式 | セッションベース認証（express-session） |
+| セッションストレージ | PostgreSQL（connect-pg-simple） |
+| Cookie設定 | `HttpOnly`, `Secure`(本番), `SameSite=lax` |
+| セッション有効期限 | 7日間 |
 
 ### 4.2 機密データの暗号化
 
-#### 4.2.1 Qiitaトークンの暗号化
+| 対象 | 暗号化方式 | 保存先 |
+|------|----------|-------|
+| Qiita APIトークン | AES-256-GCM | PostgreSQL（usersテーブル） |
+| セッションID | ランダム生成 | Cookie + PostgreSQL |
 
-ユーザーのQiita Team APIトークンは、データベースに保存する前に暗号化される。
+**暗号化キー管理**: 環境変数 `ENCRYPTION_KEY`（64文字HEX）
 
-| 項目 | 内容 |
-|------|------|
-| アルゴリズム | AES-256-GCM |
-| キー長 | 256ビット (32バイト) |
-| IV (初期化ベクトル) | 128ビット、毎回ランダム生成 |
-| 認証タグ | 128ビット（改ざん検知機能） |
-| 保存形式 | `{IV}:{AuthTag}:{EncryptedData}` (HEX) |
+### 4.3 セキュリティ対策一覧
 
-**暗号化キー管理**:
-- 環境変数 `ENCRYPTION_KEY` で管理
-- 64文字のHEX文字列（32バイト）
-- 生成コマンド: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
-
-#### 4.2.2 暗号化フロー
-
-```
-┌─────────────────┐
-│  平文トークン    │
-│  qiita_xxxxx... │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  AES-256-GCM    │
-│  暗号化処理      │
-│  ・IV生成       │
-│  ・暗号化       │
-│  ・認証タグ生成  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  暗号化データ    │
-│  iv:tag:cipher  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  PostgreSQL     │
-│  usersテーブル   │
-└─────────────────┘
-```
-
-### 4.3 CORS設定
-
-| 環境 | 許可オリジン | 説明 |
-|------|------------|------|
-| 開発環境 | `http://localhost:5173` | フロントエンド開発サーバー |
-| 本番環境 | 環境変数 `CORS_ORIGIN` で指定 | デプロイ先ドメインのみ許可 |
-
-**設定内容**:
-```typescript
-cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true  // Cookie送信を許可
-})
-```
-
-### 4.4 入力検証
-
-| 検証項目 | 内容 | エラー時 |
-|---------|------|---------|
-| メールアドレス形式 | 正規表現によるフォーマットチェック | 400 Bad Request |
-| Qiitaトークン形式 | `qiita_` プレフィックスの確認 | 400 Bad Request |
-| 検索クエリ | 必須パラメータチェック | 400 Bad Request |
-| 検索モード | ホワイトリスト検証 (`hybrid`, `keyword`, `semantic`) | 400 Bad Request |
-
-### 4.5 SQLインジェクション対策
-
-すべてのデータベースクエリはパラメータ化クエリを使用。
-
-```typescript
-// 安全な実装例
-const sql = `SELECT * FROM documents WHERE title ILIKE $1`;
-const result = await pool.query(sql, [`%${searchQuery}%`]);
-```
-
-### 4.6 権限チェック（検索結果フィルタリング）
-
-検索結果は、ユーザーのQiita Team権限でフィルタリングされる。
-
-```
-検索実行
-    │
-    ▼
-┌─────────────────────┐
-│  検索結果取得        │
-│  (DB全体から検索)    │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  トークン復号化      │
-│  (AES-256-GCM)      │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│  Qiita API呼び出し   │
-│  各記事の権限確認    │
-│  GET /items/{id}    │
-└──────────┬──────────┘
-           │
-           ├─ 200 OK → アクセス可能
-           ├─ 404 → 権限なし（除外）
-           └─ エラー → 安全側で除外
-           │
-           ▼
-┌─────────────────────┐
-│  フィルタリング済み   │
-│  検索結果を返却      │
-└─────────────────────┘
-```
-
-### 4.7 セキュリティチェックリスト
-
-| 項目 | 対策 | 状態 |
+| 脅威 | 対策 | 状態 |
 |------|------|------|
-| XSS対策 | HttpOnly Cookie | ✅ 実装済み |
-| CSRF対策 | SameSite Cookie | ✅ 実装済み |
-| セッションハイジャック | Secure Cookie (本番) | ✅ 実装済み |
-| 機密データ保護 | AES-256-GCM暗号化 | ✅ 実装済み |
-| SQLインジェクション | パラメータ化クエリ | ✅ 実装済み |
-| CORS | ホワイトリスト制御 | ✅ 実装済み |
-| 権限チェック | APIベースの権限確認 | ✅ 実装済み |
-| 入力検証 | サーバーサイドバリデーション | ✅ 実装済み |
+| XSS | HttpOnly Cookie | ✅ |
+| CSRF | SameSite Cookie | ✅ |
+| SQLインジェクション | パラメータ化クエリ | ✅ |
+| 不正アクセス | CORS + セッション認証 | ✅ |
+| トークン漏洩 | AES-256-GCM暗号化 | ✅ |
+| 権限昇格 | Qiita APIによる記事単位の権限確認 | ✅ |
 
 ---
 
 ## 5. データベース設計
 
-### 5.1 ER図
+### 主要テーブル
 
-```
-┌─────────────────────┐
-│       users         │
-├─────────────────────┤
-│ id (PK)             │
-│ username (UNIQUE)   │
-│ email (UNIQUE)      │
-│ encrypted_qiita_token │
-│ created_at          │
-│ updated_at          │
-└──────────┬──────────┘
-           │
-           │ 1:N (セッション)
-           ▼
-┌─────────────────────┐
-│      session        │
-├─────────────────────┤
-│ sid (PK)            │
-│ sess (JSON)         │──► { userId: number }
-│ expire              │
-└─────────────────────┘
+| テーブル | 用途 | 主要カラム |
+|---------|------|-----------|
+| `users` | ユーザー情報 | id, username, email, encrypted_qiita_token |
+| `session` | セッション管理 | sid, sess (JSON), expire |
+| `documents` | 記事データ | id, title, body, url, author, embedding |
 
-┌─────────────────────┐
-│     documents       │
-├─────────────────────┤
-│ id (PK)             │
-│ title               │
-│ body                │
-│ url                 │
-│ author              │
-│ source              │
-│ embedding (vector)  │──► 768次元ベクトル
-│ created_at          │
-│ updated_at          │
-│ synced_at           │
-└─────────────────────┘
-```
+### PostgreSQL拡張機能
 
-### 5.2 テーブル定義
-
-#### usersテーブル
-
-| カラム名 | 型 | 制約 | 説明 |
-|---------|-----|------|------|
-| id | SERIAL | PRIMARY KEY | ユーザーID |
-| username | VARCHAR(255) | NOT NULL, UNIQUE | ユーザー名 |
-| email | VARCHAR(255) | NOT NULL, UNIQUE | メールアドレス |
-| encrypted_qiita_token | TEXT | NOT NULL | 暗号化されたQiitaトークン |
-| created_at | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP | 作成日時 |
-| updated_at | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP | 更新日時 |
-
-#### sessionテーブル
-
-| カラム名 | 型 | 制約 | 説明 |
-|---------|-----|------|------|
-| sid | VARCHAR | PRIMARY KEY | セッションID |
-| sess | JSON | NOT NULL | セッションデータ |
-| expire | TIMESTAMP(6) | NOT NULL | 有効期限 |
-
-#### documentsテーブル
-
-| カラム名 | 型 | 制約 | 説明 |
-|---------|-----|------|------|
-| id | VARCHAR(255) | PRIMARY KEY | 記事ID (Qiita記事ID) |
-| title | TEXT | NOT NULL | 記事タイトル |
-| body | TEXT | NOT NULL | 記事本文 |
-| url | TEXT | NOT NULL | 記事URL |
-| author | VARCHAR(255) | NOT NULL | 作成者ID |
-| source | VARCHAR(50) | NOT NULL | データソース ('qiita_team') |
-| embedding | vector(768) | NULLABLE | Embeddingベクトル |
-| created_at | TIMESTAMP WITH TIME ZONE | NOT NULL | 記事作成日時 |
-| updated_at | TIMESTAMP WITH TIME ZONE | NOT NULL | 記事更新日時 |
-| synced_at | TIMESTAMP WITH TIME ZONE | DEFAULT CURRENT_TIMESTAMP | 同期日時 |
-
-### 5.3 インデックス
-
-| テーブル | インデックス名 | 種類 | 対象カラム | 用途 |
-|---------|--------------|------|-----------|------|
-| documents | idx_documents_embedding | IVFFlat | embedding | ベクトル類似度検索 |
-| documents | idx_documents_title_trgm | GIN | title | 全文検索（タイトル） |
-| documents | idx_documents_body_trgm | GIN | body | 全文検索（本文） |
-| documents | idx_documents_source | B-tree | source | ソースフィルタリング |
-| documents | idx_documents_updated_at | B-tree | updated_at | 更新日時ソート |
-| session | IDX_session_expire | B-tree | expire | 期限切れセッション検索 |
-
-### 5.4 PostgreSQL拡張機能
-
-| 拡張機能 | 用途 |
-|---------|------|
+| 拡張 | 用途 |
+|------|------|
 | pgvector | ベクトル類似度検索（コサイン類似度） |
-| pg_trgm | トライグラムによる全文検索 |
+| pg_trgm | 日本語対応全文検索 |
 
 ---
 
 ## 6. 環境変数一覧
 
-### 6.1 Backend
+### 必須環境変数
 
-| 変数名 | 必須 | 説明 | 例 |
-|--------|------|------|-----|
-| `DATABASE_URL` | ✅ | PostgreSQL接続URL | `postgresql://user:pass@localhost:5432/db` |
-| `PORT` | - | サーバーポート (デフォルト: 3000) | `3000` |
-| `NODE_ENV` | - | 環境 (`development` / `production`) | `production` |
-| `CORS_ORIGIN` | ✅ (本番) | 許可するオリジン | `https://app.example.com` |
-| `SESSION_SECRET` | ✅ | セッション暗号化キー (64文字HEX) | `b9287535ea7f...` |
-| `ENCRYPTION_KEY` | ✅ | トークン暗号化キー (64文字HEX) | `0d736f21c169...` |
-
-### 6.2 Frontend
-
-| 変数名 | 必須 | 説明 | 例 |
-|--------|------|------|-----|
-| `VITE_API_URL` | ✅ | バックエンドAPIのURL | `http://localhost:3000` |
-| `VITE_APP_TITLE` | - | アプリケーションタイトル | `Groovy Knowledge Search` |
-
-### 6.3 Sync Worker
-
-| 変数名 | 必須 | 説明 | 例 |
-|--------|------|------|-----|
-| `DATABASE_URL` | ✅ | PostgreSQL接続URL | `postgresql://user:pass@localhost:5432/db` |
-| `QIITA_TEAM_TOKEN` | ✅ (本番) | Qiita Team APIトークン | `qiita_xxxxx...` |
-| `QIITA_TEAM_NAME` | ✅ (本番) | Qiita Teamの名前 | `your-company` |
-| `GEMINI_API_KEY` | ✅ (本番) | Google Gemini APIキー | `AIzaSy...` |
-| `USE_MOCK_QIITA` | - | モックモード (`true` / `false`) | `false` |
-| `USE_MOCK_GEMINI` | - | モックモード (`true` / `false`) | `false` |
-| `SYNC_CRON_SCHEDULE` | - | 同期スケジュール (cron形式) | `0 2 * * *` |
+| 変数名 | 用途 | 設定先 |
+|--------|------|-------|
+| `DATABASE_URL` | PostgreSQL接続URL | Backend, Sync Worker |
+| `SESSION_SECRET` | セッション暗号化キー（64文字HEX） | Backend |
+| `ENCRYPTION_KEY` | トークン暗号化キー（64文字HEX） | Backend |
+| `CORS_ORIGIN` | 許可オリジン（本番のみ） | Backend |
+| `QIITA_TEAM_TOKEN` | Qiita Team APIトークン | Sync Worker |
+| `GEMINI_API_KEY` or `OPENAI_API_KEY` | Embedding APIキー | Sync Worker |
 
 ---
 
-## 7. デプロイメント
+## 7. 外部サービス権限サマリー
 
-### 7.1 Docker Compose構成
+### 必要な権限・設定の一覧
 
-```yaml
-services:
-  postgres:
-    image: pgvector/pgvector:pg16
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d
-```
+| サービス | 必要な権限/設定 | 取得手順 |
+|---------|---------------|---------|
+| **Qiita Team** | `read_qiita` スコープ | 設定→アプリケーション→トークン発行 |
+| **Google Cloud** | Generative Language API有効化 | Cloud Console→API→有効化 |
+| **OpenAI** | APIキー発行 | Platform→API Keys→Create |
 
-### 7.2 本番環境チェックリスト
+### データ利用に関する保証
 
-| 項目 | 確認事項 |
-|------|---------|
-| NODE_ENV | `production` に設定 |
-| SESSION_SECRET | 強力なランダム値を設定 |
-| ENCRYPTION_KEY | 強力なランダム値を設定 |
-| CORS_ORIGIN | 本番ドメインを指定 |
-| USE_MOCK_* | すべて `false` に設定 |
-| HTTPS | 本番環境ではHTTPSを使用 |
-| バックアップ | データベースバックアップ戦略を策定 |
+| 確認事項 | Gemini API | OpenAI API |
+|---------|-----------|-----------|
+| 送信データの学習利用 | **なし** | **なし** |
+| 第三者へのデータ共有 | なし | なし |
+| GDPR準拠 | 準拠 | 準拠 |
 
 ---
 
-## 8. 運用・監視
+## 8. 運用
 
-### 8.1 自動同期スケジュール
+### 自動同期
 
 | 項目 | 設定 |
 |------|------|
-| スケジュール | 毎日午前2時 (JST) |
-| cron式 | `0 2 * * *` |
-| タイムゾーン | Asia/Tokyo |
+| スケジュール | 毎日午前2時（JST） |
+| 処理内容 | Qiita Team記事取得 → Embedding生成 → DB保存 |
 
-### 8.2 エラー時の動作
+### エラー時の動作
 
 | シナリオ | 動作 |
 |---------|------|
-| Qiita API接続失敗 | エラーログ出力、次回同期まで待機 |
-| Gemini API接続失敗 | エンベディングなしで記事同期を継続 |
-| DB接続失敗 | 同期処理を中断、次回同期まで待機 |
-| 権限確認失敗 | 安全側に倒し、該当記事をフィルタリング |
-
-### 8.3 今後の監視検討項目
-
-- 構造化ログ導入（winston等）
-- Prometheusメトリクス連携
-- アラート設定（エラー率、レスポンスタイム）
+| Qiita API失敗 | 次回同期まで待機 |
+| Embedding API失敗 | エンベディングなしで記事同期を継続 |
+| DB接続失敗 | 同期中断、次回同期まで待機 |
 
 ---
 
@@ -528,22 +216,4 @@ services:
 | 日付 | バージョン | 変更内容 |
 |------|-----------|---------|
 | 2026-02-19 | 1.0 | 初版作成 |
-
----
-
-## 付録A: 権限一覧サマリー
-
-### 外部サービスに必要な権限
-
-| サービス | 必要な権限/スコープ | 取得方法 |
-|---------|------------------|---------|
-| **Qiita Team API** | `read_qiita` スコープ | Qiita設定画面でトークン発行 |
-| **Google Gemini API** | Generative Language API有効化 | Google Cloud ConsoleでAPI有効化 + APIキー発行 |
-
-### システム内部の権限モデル
-
-| リソース | 権限チェック方法 |
-|---------|----------------|
-| 検索API | セッション認証（ログイン必須） |
-| 検索結果 | Qiita Team APIで記事単位の権限確認 |
-| ユーザー情報 | 本人のセッションのみアクセス可 |
+| 2026-02-19 | 1.1 | OpenAI API追記、簡略化、データプライバシーポリシー追加 |
